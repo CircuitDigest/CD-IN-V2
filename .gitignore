@@ -8,3 +8,5 @@ data/*.db
 old-db.db
 uploads/instagram-microsite/*
 !uploads/instagram-microsite/.gitkeep
+uploads/webinar/*
+!uploads/webinar/.gitkeep

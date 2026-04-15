@@ -100,13 +100,14 @@
       <nav class="tabs" aria-label="Admin sections">
         <a class="tab active" href="{{ url_for('admin_bp.admin') }}">Overview</a>
         <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
-        <span class="tab disabled">Coming Soon</span>
+        <a class="tab" href="{{ url_for('webinar_bp.admin_webinar') }}">Webinar</a>
       </nav>
 
       <section class="card">
-        <p>Use tabs in this admin panel to manage website modules. Instagram Microsite is the first active tab.</p>
+        <p>Use tabs in this admin panel to manage website modules including Instagram Microsite and Webinar workflows.</p>
         <div class="actions">
           <a class="button-link" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Open Instagram Microsite Tab</a>
+          <a class="button-link" href="{{ url_for('webinar_bp.admin_webinar') }}">Open Webinar Tab</a>
         </div>
       </section>
     </main>

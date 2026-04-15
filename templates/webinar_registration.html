@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Webinar Registration - CircuitDigest</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #0f172a; }
+      .page { max-width: 860px; margin: 0 auto; padding: 0.7rem 0.75rem 1.5rem; }
+      .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 0.95rem; margin-bottom: 0.9rem; }
+      h1 { margin: 0 0 0.6rem; font-size: 1.2rem; line-height: 1.3; }
+      .lead { color: #475569; margin-bottom: 0.9rem; font-size: 0.94rem; }
+      .row { display: grid; grid-template-columns: 1fr; gap: 0.72rem; margin-bottom: 0.72rem; }
+      @media (min-width: 760px) {
+        .page { padding: 1rem 1rem 2rem; }
+        .card { padding: 1rem; }
+        h1 { font-size: 1.5rem; }
+        .row.two { grid-template-columns: 1fr 1fr; }
+      }
+      label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.28rem; color: #334155; }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.72rem 0.72rem;
+        box-sizing: border-box;
+        font-size: 16px; /* mobile-friendly, avoids iOS zoom */
+      }
+      textarea { min-height: 90px; resize: vertical; }
+      .checkbox { display: flex; align-items: center; gap: 0.5rem; }
+      .checkbox input { width: auto; }
+      button {
+        background: #0f172a; color: #fff; border: 0; border-radius: 8px;
+        padding: 0.7rem 1rem; font-weight: 600; cursor: pointer;
+      }
+      .muted { color: #64748b; font-size: 0.85rem; }
+      .flash { padding: 0.7rem 0.8rem; border-radius: 8px; margin-bottom: 0.7rem; font-size: 0.9rem; }
+      .flash.success { background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0; }
+      .flash.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <h1>CircuitDigest Webinar Registration</h1>
+        {% if webinar %}
+          <p class="lead">
+            Register for <strong>{{ webinar.topic }}</strong> on
+            <strong>{{ webinar.webinar_date }}</strong> at <strong>{{ webinar.webinar_time }}</strong>.
+          </p>
+          {% if webinar.banner_image_url %}
+            <img src="{{ webinar.banner_image_url }}" alt="Webinar Banner" style="width:100%;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:0.8rem;">
+          {% endif %}
+        {% else %}
+          <p class="lead">No active webinar is available right now. Please check back soon.</p>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+
+        {% if webinar and not just_registered %}
+        <form method="post" action="{{ url_for('webinar_bp.webinar_registration') }}">
+          <input type="text" name="website" class="hidden" tabindex="-1" autocomplete="off">
+          <div class="row two">
+            <div>
+              <label for="full_name">Full Name</label>
+              <input id="full_name" name="full_name" type="text" autocomplete="name" value="{{ form_data.get('full_name', '') }}" required>
+            </div>
+            <div>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" value="{{ form_data.get('email', '') }}" required>
+            </div>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label for="phone">Phone Number</label>
+              <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit mobile number" value="{{ form_data.get('phone', '') }}" required>
+            </div>
+            <div>
+              <label for="occupation">Occupation</label>
+              <select id="occupation" name="occupation" required>
+                <option value="">Select occupation</option>
+                <option {% if form_data.get('occupation') == 'Student' %}selected{% endif %}>Student</option>
+                <option {% if form_data.get('occupation') == 'Working Professional' %}selected{% endif %}>Working Professional</option>
+                <option {% if form_data.get('occupation') == 'Founder' %}selected{% endif %}>Founder</option>
+                <option {% if form_data.get('occupation') == 'Hobbyist / Maker' %}selected{% endif %}>Hobbyist / Maker</option>
+                <option {% if form_data.get('occupation') == 'Educator' %}selected{% endif %}>Educator</option>
+                <option {% if form_data.get('occupation') == 'Other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label for="domain_interest">Domain of Interest</label>
+              <select id="domain_interest" name="domain_interest" required>
+                <option value="">Select domain</option>
+                <option {% if form_data.get('domain_interest') == 'Embedded Systems' %}selected{% endif %}>Embedded Systems</option>
+                <option {% if form_data.get('domain_interest') == 'Power Electronics' %}selected{% endif %}>Power Electronics</option>
+                <option {% if form_data.get('domain_interest') == 'IoT and Connected Devices' %}selected{% endif %}>IoT and Connected Devices</option>
+                <option {% if form_data.get('domain_interest') == 'Robotics and Automation' %}selected{% endif %}>Robotics and Automation</option>
+                <option {% if form_data.get('domain_interest') == 'EV and BMS' %}selected{% endif %}>EV and BMS</option>
+                <option {% if form_data.get('domain_interest') == 'Solar and Renewables' %}selected{% endif %}>Solar and Renewables</option>
+                <option {% if form_data.get('domain_interest') == 'AI and Edge ML' %}selected{% endif %}>AI and Edge ML</option>
+              </select>
+            </div>
+            <div>
+              <label for="city">City</label>
+              <input id="city" name="city" type="text" autocomplete="address-level2" value="{{ form_data.get('city', '') }}">
+            </div>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label for="country">Country</label>
+              <select id="country" name="country" autocomplete="country-name" required>
+                <option value="">Select country</option>
+                <option {% if form_data.get('country') == 'India' %}selected{% endif %}>India</option>
+                <option {% if form_data.get('country') == 'United States' %}selected{% endif %}>United States</option>
+                <option {% if form_data.get('country') == 'United Kingdom' %}selected{% endif %}>United Kingdom</option>
+                <option {% if form_data.get('country') == 'Canada' %}selected{% endif %}>Canada</option>
+                <option {% if form_data.get('country') == 'Germany' %}selected{% endif %}>Germany</option>
+                <option {% if form_data.get('country') == 'Australia' %}selected{% endif %}>Australia</option>
+                <option {% if form_data.get('country') == 'Singapore' %}selected{% endif %}>Singapore</option>
+              </select>
+            </div>
+            <div class="muted" style="display:flex;align-items:end;">
+              You can optionally add social profiles for post-webinar engagement.
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label id="organization_label" for="organization_name">Company / Organization Name</label>
+              <input id="organization_name" name="organization_name" type="text" autocomplete="organization" placeholder="Your company name" value="{{ form_data.get('organization_name', '') }}" required>
+            </div>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label for="social_linkedin">LinkedIn (URL or handle)</label>
+              <input id="social_linkedin" name="social_linkedin" type="text" autocomplete="url" placeholder="https://linkedin.com/in/yourname" value="{{ form_data.get('social_linkedin', '') }}">
+              <div id="linkedin_hint" class="muted"></div>
+            </div>
+            <div>
+              <label for="social_instagram">Instagram (URL or @handle)</label>
+              <input id="social_instagram" name="social_instagram" type="text" autocomplete="username" placeholder="@username" value="{{ form_data.get('social_instagram', '') }}">
+              <div id="instagram_hint" class="muted"></div>
+            </div>
+          </div>
+
+          <div class="row two">
+            <div>
+              <label for="social_x">X (URL or @handle)</label>
+              <input id="social_x" name="social_x" type="text" autocomplete="username" placeholder="@username" value="{{ form_data.get('social_x', '') }}">
+              <div id="x_hint" class="muted"></div>
+            </div>
+            <div>
+              <label for="social_youtube">YouTube (channel URL)</label>
+              <input id="social_youtube" name="social_youtube" type="text" autocomplete="url" placeholder="https://youtube.com/@channel" value="{{ form_data.get('social_youtube', '') }}">
+              <div id="youtube_hint" class="muted"></div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="checkbox">
+              <input id="wants_to_present" name="wants_to_present" type="checkbox" {% if form_data.get('wants_to_present') == 'on' %}checked{% endif %}>
+              I want to present my project in this webinar
+            </label>
+          </div>
+
+          <div id="present_fields" class="hidden">
+            <div class="row">
+              <div>
+                <label for="presentation_topic">Presentation Topic</label>
+                <input id="presentation_topic" name="presentation_topic" type="text" placeholder="Short project title" value="{{ form_data.get('presentation_topic', '') }}">
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="presentation_description">What would you like to present?</label>
+                <textarea id="presentation_description" name="presentation_description" placeholder="2-5 lines about your project/demo">{{ form_data.get('presentation_description', '') }}</textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="checkbox">
+              <input name="terms_accepted" type="checkbox" required {% if form_data.get('terms_accepted') == 'on' %}checked{% endif %}>
+              I agree to receive webinar updates via email and WhatsApp.
+            </label>
+          </div>
+
+          <button type="submit">Register for Webinar</button>
+        </form>
+        {% elif webinar and just_registered %}
+          <div class="flash success">
+            Registration successful. Thank you for registering! You will receive webinar confirmation details on your contact channels shortly.
+          </div>
+          <p class="muted">
+            If you do not receive a confirmation within a few minutes, please check spam/promotions folder or contact CircuitDigest support.
+          </p>
+        {% endif %}
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const toggle = document.getElementById("wants_to_present");
+        const fields = document.getElementById("present_fields");
+        const topic = document.getElementById("presentation_topic");
+        const desc = document.getElementById("presentation_description");
+        if (!toggle || !fields) return;
+        function sync() {
+          const on = toggle.checked;
+          fields.classList.toggle("hidden", !on);
+          if (topic) topic.required = on;
+          if (desc) desc.required = on;
+        }
+        toggle.addEventListener("change", sync);
+        sync();
+      })();
+
+      (function () {
+        const occupation = document.getElementById("occupation");
+        const orgLabel = document.getElementById("organization_label");
+        const orgInput = document.getElementById("organization_name");
+
+        function syncOrganizationLabel() {
+          const value = occupation ? occupation.value : "";
+          if (value === "Student" || value === "Educator") {
+            orgLabel.textContent = "University / Institute Name";
+            orgInput.placeholder = "Your university or institute name";
+          } else {
+            orgLabel.textContent = "Company / Organization Name";
+            orgInput.placeholder = "Your company or organization name";
+          }
+        }
+
+        if (occupation) {
+          occupation.addEventListener("change", syncOrganizationLabel);
+          syncOrganizationLabel();
+        }
+      })();
+
+      (function () {
+        function bindHint(inputId, hintId, formatter) {
+          const input = document.getElementById(inputId);
+          const hint = document.getElementById(hintId);
+          if (!input || !hint) return;
+          const render = () => {
+            const text = (input.value || "").trim();
+            const suggestion = formatter(text);
+            hint.textContent = suggestion ? "Suggested format: " + suggestion : "";
+          };
+          input.addEventListener("input", render);
+          render();
+        }
+
+        bindHint("social_linkedin", "linkedin_hint", (text) => {
+          if (!text) return "https://www.linkedin.com/in/your-handle";
+          if (text.startsWith("@")) return "https://www.linkedin.com/in/" + text.slice(1);
+          if (!text.includes("linkedin.com") && !text.startsWith("http")) return "https://www.linkedin.com/in/" + text;
+          return "";
+        });
+        bindHint("social_instagram", "instagram_hint", (text) => {
+          if (!text) return "https://www.instagram.com/your-handle";
+          if (text.startsWith("@")) return "https://www.instagram.com/" + text.slice(1);
+          return "";
+        });
+        bindHint("social_x", "x_hint", (text) => {
+          if (!text) return "https://x.com/your-handle";
+          if (text.startsWith("@")) return "https://x.com/" + text.slice(1);
+          return "";
+        });
+        bindHint("social_youtube", "youtube_hint", (text) => {
+          if (!text) return "https://www.youtube.com/@your-channel";
+          if (text.startsWith("@")) return "https://www.youtube.com/" + text;
+          return "";
+        });
+      })();
+    </script>
+  </body>
+</html>
