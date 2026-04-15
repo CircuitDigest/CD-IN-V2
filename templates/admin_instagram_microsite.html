@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Microsite Admin</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+        .header {
+            background: linear-gradient(135deg, #0085d5 0%, #0369a1 100%);
+            color: #fff;
+            padding: 1rem;
+        }
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .header h1 { font-size: 1.3rem; font-weight: 700; }
+        .header-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .tabs {
+            max-width: 1100px;
+            margin: 0.75rem auto 0;
+            display: flex;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+        .tab {
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.84rem;
+            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            font-weight: 600;
+        }
+        .tab.active {
+            background: #fff;
+            color: #0f172a;
+            border-color: #fff;
+        }
+        .tab.disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        .btn-link {
+            text-decoration: none;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 8px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.86rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.12);
+        }
+        .container {
+            max-width: 1100px;
+            margin: 1.2rem auto;
+            padding: 0 1rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+        }
+        .card h2 {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            color: #0f172a;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.28rem;
+            color: #334155;
+        }
+        input, select {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.62rem 0.72rem;
+            font-size: 0.92rem;
+            background: #fff;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0085d5;
+            box-shadow: 0 0 0 3px rgba(0,133,213,0.15);
+        }
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 0.62rem 0.95rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0085d5 0%, #0369a1 100%);
+            color: #fff;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+        .status {
+            padding: 0.65rem 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 0.9rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+        .status.success {
+            background: #ecfdf3;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        .status.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        th, td {
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0.6rem 0.35rem;
+            vertical-align: top;
+        }
+        th { color: #334155; font-size: 0.79rem; text-transform: uppercase; letter-spacing: 0.4px; }
+        .img-preview {
+            width: 80px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #dbe3ec;
+        }
+        .inline-form { display: inline; }
+        .helper {
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .stat-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 0.75rem 0.9rem;
+            background: #fff;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 0.2rem;
+        }
+        .stat-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        @media (min-width: 860px) {
+            .row.two {
+                grid-template-columns: 1fr 1fr;
+            }
+            .row.three {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <h1>Instagram Microsite Manager</h1>
+            <div class="header-actions">
+                <a class="btn-link" href="/instagram-microsite" target="_blank" rel="noopener noreferrer">Preview</a>
+                <a class="btn-link" href="/admin">Overview</a>
+                <a class="btn-link" href="/admin/logout">Logout</a>
+            </div>
+        </div>
+        <nav class="tabs" aria-label="Admin sections">
+            <a class="tab" href="/admin">Overview</a>
+            <a class="tab active" href="/admin/instagram-microsite">Instagram Microsite</a>
+            <span class="tab disabled">Coming Soon</span>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% if message %}
+            <div class="status {{ message_type if message_type else 'success' }}">{{ message }}</div>
+        {% endif %}
+
+        <section class="card">
+            <h2>Microsite Branding and Community CTA</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="save_config">
+                <div class="row two">
+                    <div>
+                        <label for="heading">Heading</label>
+                        <input id="heading" name="heading" type="text" maxlength="200" value="{{ config.heading if config else '' }}" required>
+                    </div>
+                    <div>
+                        <label for="community_button_text">Community Button Text</label>
+                        <input id="community_button_text" name="community_button_text" type="text" maxlength="80" value="{{ config.community_button_text if config else 'Join Our WhatsApp Community' }}">
+                    </div>
+                </div>
+                <div class="row two">
+                    <div>
+                        <label for="subheading">Subheading</label>
+                        <input id="subheading" name="subheading" type="text" maxlength="300" value="{{ config.subheading if config else '' }}">
+                    </div>
+                    <div>
+                        <label for="community_link">WhatsApp Community Link</label>
+                        <input id="community_link" name="community_link" type="url" placeholder="https://chat.whatsapp.com/..." value="{{ config.community_link if config else '' }}">
+                        <div class="helper">Paste your WhatsApp group/community invite URL.</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Save Microsite Settings</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Add Category</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="add_category">
+                <div class="row three">
+                    <div>
+                        <label for="category_name">Category Name</label>
+                        <input id="category_name" name="category_name" type="text" placeholder="e.g. Robotics Projects" required>
+                    </div>
+                    <div>
+                        <label for="category_order">Display Order</label>
+                        <input id="category_order" name="category_order" type="number" min="0" value="0">
+                    </div>
+                    <div style="display:flex; align-items:end;">
+                        <button class="btn btn-primary" type="submit">Add Category</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-wrap" style="margin-top: 0.8rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Slug</th>
+                            <th>Order</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                            <tr>
+                                <td>{{ category.name }}</td>
+                                <td>{{ category.slug }}</td>
+                                <td>{{ category.display_order }}</td>
+                                <td>
+                                    <form class="inline-form" method="POST" onsubmit="return confirm('Delete category and all its project cards?');">
+                                        <input type="hidden" name="action" value="delete_category">
+                                        <input type="hidden" name="category_id" value="{{ category.id }}">
+                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Add Project Card</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="add_project">
+                <div class="row two">
+                    <div>
+                        <label for="project_category_id">Category</label>
+                        <select id="project_category_id" name="project_category_id" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="project_order">Display Order</label>
+                        <input id="project_order" name="project_order" type="number" min="0" value="0">
+                    </div>
+                </div>
+                <div class="row two">
+                    <div>
+                        <label for="project_title">Project Title</label>
+                        <input id="project_title" name="project_title" type="text" maxlength="220" required>
+                    </div>
+                    <div>
+                        <label for="project_url">Project Link (CircuitDigest URL)</label>
+                        <input id="project_url" name="project_url" type="url" placeholder="https://circuitdigest.com/..." required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div>
+                        <label for="project_image">Project Image (recommended 750x500)</label>
+                        <input id="project_image" name="project_image" type="file" accept="image/*">
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">Add Project Card</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>Click Summary</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Clicks - Last 30 Days</div>
+                    <div class="stat-value">{{ total_clicks_30d }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Clicks - Last 90 Days</div>
+                    <div class="stat-value">{{ total_clicks_90d }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Clicks - All Time</div>
+                    <div class="stat-value">{{ total_clicks_all_time }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Current Project Cards</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Link</th>
+                            <th>Order</th>
+                            <th title="Clicks in the rolling last 30 days">Last 30 Days</th>
+                            <th title="Clicks in the rolling last 90 days">Last 90 Days</th>
+                            <th>Total clicks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %}
+                            {% set stats = click_stats.get(project.id, {}) %}
+                            <tr>
+                                <td>
+                                    {% if project.image_url %}
+                                        <img class="img-preview" src="{{ project.image_url }}" alt="{{ project.title }}">
+                                    {% else %}
+                                        <span style="color:#94a3b8;">No image</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ project.title }}</td>
+                                <td>{{ project.category_name if project.category_name else 'Uncategorized' }}</td>
+                                <td>
+                                    <a href="{{ project.project_url }}" target="_blank" rel="noopener noreferrer" style="color:#0369a1;">
+                                        Open
+                                    </a>
+                                </td>
+                                <td>{{ project.display_order }}</td>
+                                <td style="text-align:center;font-weight:600;color:#0d3d79;">{{ stats.get('last_30_days', 0) }}</td>
+                                <td style="text-align:center;color:#64748b;">{{ stats.get('last_90_days', 0) }}</td>
+                                <td style="text-align:center;color:#475569;">{{ stats.get('total', 0) }}</td>
+                                <td>
+                                    <form class="inline-form" method="POST" onsubmit="return confirm('Delete this project card?');">
+                                        <input type="hidden" name="action" value="delete_project">
+                                        <input type="hidden" name="project_id" value="{{ project.id }}">
+                                        <button class="btn btn-danger" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="9" style="color:#64748b;">No project cards yet. Add the first one above.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

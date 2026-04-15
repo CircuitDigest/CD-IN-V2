@@ -4,3 +4,7 @@ __pycache__/
 .env
 .venv/
 venv/
+data/*.db
+old-db.db
+uploads/instagram-microsite/*
+!uploads/instagram-microsite/.gitkeep

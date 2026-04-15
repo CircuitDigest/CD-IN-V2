@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        background: #f4f6fb;
+        color: #0f172a;
+      }
+      .page {
+        max-width: 1100px;
+        margin: 1.25rem auto;
+        padding: 0 1rem 2rem;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.9rem;
+      }
+      .topbar h1 {
+        margin: 0;
+        font-size: 1.3rem;
+      }
+      .tabs {
+        display: flex;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+      .tab {
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.88rem;
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: #334155;
+      }
+      .tab.active {
+        background: #0f172a;
+        color: #fff;
+        border-color: #0f172a;
+      }
+      .tab.disabled {
+        opacity: 0.55;
+        pointer-events: none;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.2rem;
+      }
+      p {
+        margin-top: 0;
+        color: #475569;
+      }
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      a.button-link {
+        display: inline-block;
+        background: #1d4ed8;
+        color: #fff;
+        border-radius: 8px;
+        padding: 0.65rem 0.9rem;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      button {
+        background: #111827;
+        color: #fff;
+        border: 0;
+        border-radius: 8px;
+        padding: 0.65rem 0.9rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="topbar">
+        <h1>Admin Panel</h1>
+        <form method="post" action="{{ url_for('admin_bp.admin_logout') }}">
+          <button type="submit">Log out</button>
+        </form>
+      </div>
+
+      <nav class="tabs" aria-label="Admin sections">
+        <a class="tab active" href="{{ url_for('admin_bp.admin') }}">Overview</a>
+        <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
+        <span class="tab disabled">Coming Soon</span>
+      </nav>
+
+      <section class="card">
+        <p>Use tabs in this admin panel to manage website modules. Instagram Microsite is the first active tab.</p>
+        <div class="actions">
+          <a class="button-link" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Open Instagram Microsite Tab</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
