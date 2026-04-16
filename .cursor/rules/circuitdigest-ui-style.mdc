@@ -1,0 +1,21 @@
+---
+description: Use CircuitDigest visual system across pages
+globs: templates/**/*.html
+alwaysApply: false
+---
+
+# CircuitDigest UI Style Rule
+
+- Match the visual language used in `templates/instagram_microsite.html`.
+- Use `Roboto` and the same color tokens:
+  - `--site-navy: #0d3d79`
+  - `--site-red: #fc0000`
+  - `--brand: #0085d5`
+  - `--text-primary: #0f172a`
+  - `--text-secondary: #64748b`
+- Keep pages white/light with navy accent bars, tabs, or chips like the microsite.
+- Use CircuitDigest logo header at the top on public pages unless product requirements say otherwise.
+- For section headings, prefer navy text with a short red accent line.
+- Buttons should use navy primary styling and pill/rounded shape consistent with microsite.
+- Maintain clean card-based layout with soft borders and subtle shadows (`#e5edf5` / light shadow).
+- For webinar/event pages, always present title + day + date + time in a high-visibility block above the form.

@@ -33,6 +33,7 @@ PORT=5002 python app.py
 - `/admin` -> admin login/dashboard
 - `/admin/instagram-microsite` -> microsite content manager
 - `/webinar-registration` -> public webinar registration page
+- `/circuitdigest-community-webinar` -> public webinar registration page (SEO slug alias)
 - `/admin/webinar` -> webinar admin settings/registrations/messaging
 
 ## Database workflow

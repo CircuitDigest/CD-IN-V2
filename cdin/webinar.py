@@ -24,9 +24,45 @@ def _is_admin_authenticated() -> bool:
     return session.get("admin_authenticated", False) is True
 
 
+def _webinar_display_meta(webinar):
+    if not webinar:
+        return {}
+
+    date_raw = (webinar.get("webinar_date") or "").strip()
+    time_raw = (webinar.get("webinar_time") or "").strip()
+    date_display = date_raw
+    day_display = ""
+    time_display = time_raw
+
+    try:
+        parsed_date = datetime.strptime(date_raw, "%Y-%m-%d")
+        date_display = parsed_date.strftime("%d %b %Y")
+        day_display = parsed_date.strftime("%A")
+    except ValueError:
+        pass
+
+    try:
+        parsed_time = datetime.strptime(time_raw, "%H:%M")
+        time_display = parsed_time.strftime("%I:%M %p")
+    except ValueError:
+        pass
+
+    return {
+        "date_display": date_display,
+        "day_display": day_display,
+        "time_display": time_display,
+    }
+
+
 @bp.route("/webinar-registration", methods=["GET", "POST"], endpoint="webinar_registration")
+@bp.route(
+    "/circuitdigest-community-webinar",
+    methods=["GET", "POST"],
+    endpoint="webinar_registration_pretty",
+)
 def webinar_registration():
     webinar = get_active_webinar()
+    webinar_meta = _webinar_display_meta(webinar)
     form_data = {}
     just_registered = request.args.get("registered") == "1"
     if request.method == "POST":
@@ -42,6 +78,7 @@ def webinar_registration():
     return render_template(
         "webinar_registration.html",
         webinar=webinar,
+        webinar_meta=webinar_meta,
         form_data=form_data,
         just_registered=just_registered,
     )
@@ -101,6 +138,7 @@ def admin_webinar():
     return render_template(
         "admin_webinar.html",
         config=dashboard["config"],
+        registration_public_url=url_for("webinar_bp.webinar_registration_pretty", _external=True),
         registrations=dashboard["registrations"],
         stats=dashboard["stats"],
         deliveries=dashboard["deliveries"],
