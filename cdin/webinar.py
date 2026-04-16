@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, send_from_directory, session, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, send_from_directory, session, url_for
+import requests
 from werkzeug.utils import secure_filename
 
 from .config import WEBINAR_UPLOADS_DIR
@@ -54,6 +55,54 @@ def _webinar_display_meta(webinar):
     }
 
 
+def _msg91_diagnostics() -> dict:
+    def _present(name: str) -> bool:
+        return bool(os.environ.get(name, "").strip())
+
+    def _ping(url: str) -> dict:
+        try:
+            resp = requests.get(url, timeout=4)
+            return {"ok": True, "status": resp.status_code}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+    def _t(name: str, default: str) -> str:
+        return (os.environ.get(name) or "").strip() or default
+
+    return {
+        "env": {
+            "MSG91_EMAIL_AUTHKEY": _present("MSG91_EMAIL_AUTHKEY"),
+            "MSG91_EMAIL_DOMAIN": _present("MSG91_EMAIL_DOMAIN"),
+            "MSG91_EMAIL_FROM": _present("MSG91_EMAIL_FROM"),
+            "MSG91_WHATSAPP_AUTHKEY": _present("MSG91_WHATSAPP_AUTHKEY"),
+            "MSG91_WHATSAPP_NUMBER": _present("MSG91_WHATSAPP_NUMBER"),
+            "MSG91_WHATSAPP_TEMPLATE_NAMESPACE": _present("MSG91_WHATSAPP_TEMPLATE_NAMESPACE"),
+            "WEBINAR_EMAIL_TEMPLATE_CONFIRMATION": _present("WEBINAR_EMAIL_TEMPLATE_CONFIRMATION"),
+            "WEBINAR_WHATSAPP_TEMPLATE_CONFIRMATION": _present("WEBINAR_WHATSAPP_TEMPLATE_CONFIRMATION"),
+        },
+        "templates": {
+            "reminder_24h": {
+                "whatsapp": _t("WEBINAR_WHATSAPP_TEMPLATE_REMINDER_24H", "event_webinar_reminder"),
+                "email": _t("WEBINAR_EMAIL_TEMPLATE_REMINDER_24H", "cd_webinar_reminder"),
+            },
+            "reminder_1h": {
+                "whatsapp": "(disabled)",
+                "email": _t("WEBINAR_EMAIL_TEMPLATE_REMINDER_1H", "cd_webinar_reminder"),
+            },
+            "reminder_live": {
+                "whatsapp": _t("WEBINAR_WHATSAPP_TEMPLATE_REMINDER_LIVE", "event_webinar_reminder"),
+                "email": _t("WEBINAR_EMAIL_TEMPLATE_REMINDER_LIVE", "cd_webinar_reminder"),
+            },
+        },
+        "network": {
+            "msg91_email_api": _ping("https://control.msg91.com/api/v5/email/send"),
+            "msg91_whatsapp_api": _ping(
+                "https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/"
+            ),
+        },
+    }
+
+
 @bp.route("/webinar-registration", methods=["GET", "POST"], endpoint="webinar_registration")
 @bp.route(
     "/circuitdigest-community-webinar",
@@ -65,14 +114,23 @@ def webinar_registration():
     webinar_meta = _webinar_display_meta(webinar)
     form_data = {}
     just_registered = request.args.get("registered") == "1"
+    registered_email = (request.args.get("email") or "").strip()
+    registration_updated = request.args.get("updated") == "1"
     if request.method == "POST":
         form_data = request.form.to_dict()
         try:
-            registration_id = create_registration(
+            result = create_registration(
                 form_data, request.headers.get("X-Forwarded-For", request.remote_addr or "")
             )
-            send_registration_confirmation(registration_id)
-            return redirect(url_for("webinar_bp.webinar_registration", registered="1"))
+            send_registration_confirmation(int(result["id"]))
+            return redirect(
+                url_for(
+                    "webinar_bp.webinar_registration_pretty",
+                    registered="1",
+                    email=result.get("email", ""),
+                    updated="1" if result.get("updated") else "0",
+                )
+            )
         except Exception as exc:
             flash(str(exc), "error")
     return render_template(
@@ -81,11 +139,36 @@ def webinar_registration():
         webinar_meta=webinar_meta,
         form_data=form_data,
         just_registered=just_registered,
+        registered_email=registered_email,
+        registration_updated=registration_updated,
     )
 
 
 @bp.route("/uploads/webinar/<path:filename>", endpoint="webinar_upload")
 def webinar_upload(filename):
+    return send_from_directory(WEBINAR_UPLOADS_DIR, filename)
+
+
+@bp.route("/static/webinar/banner.jpg", endpoint="webinar_banner_static")
+def webinar_banner_static():
+    """
+    Stable banner URL for email templates.
+
+    Always serves the current active webinar's uploaded banner image file.
+    """
+    webinar = get_active_webinar()
+    banner_url = (webinar or {}).get("banner_image_url") or ""
+    if not banner_url:
+        abort(404)
+
+    prefix = "/uploads/webinar/"
+    if not banner_url.startswith(prefix):
+        abort(404)
+
+    filename = banner_url.replace(prefix, "", 1).strip("/")
+    if not filename:
+        abort(404)
+
     return send_from_directory(WEBINAR_UPLOADS_DIR, filename)
 
 
@@ -121,8 +204,21 @@ def admin_webinar():
                 message_type = "success"
             elif action == "manual_reminder":
                 reminder_type = request.form.get("reminder_type", "").strip()
-                result = trigger_manual_reminder(reminder_type)
-                message = f"Reminder sent: {result['sent']} | failed: {result['failed']}"
+                channel = request.form.get("channel", "").strip().lower()
+                if channel == "email":
+                    result = trigger_manual_reminder(
+                        reminder_type, channels=("email",), ignore_already_sent=True
+                    )
+                elif channel == "whatsapp":
+                    result = trigger_manual_reminder(
+                        reminder_type, channels=("whatsapp",), ignore_already_sent=True
+                    )
+                else:
+                    result = trigger_manual_reminder(reminder_type, ignore_already_sent=True)
+                message = (
+                    f"Reminder sent ({channel or 'email+whatsapp'}): "
+                    f"{result['sent']} | failed: {result['failed']}"
+                )
                 message_type = "success"
             elif action == "run_scheduler_now":
                 result = run_scheduled_reminders()
@@ -139,9 +235,11 @@ def admin_webinar():
         "admin_webinar.html",
         config=dashboard["config"],
         registration_public_url=url_for("webinar_bp.webinar_registration_pretty", _external=True),
+        active_registration_count=dashboard.get("active_registration_count", 0),
         registrations=dashboard["registrations"],
         stats=dashboard["stats"],
         deliveries=dashboard["deliveries"],
+        msg91_diag=_msg91_diagnostics(),
         message=message,
         message_type=message_type,
     )

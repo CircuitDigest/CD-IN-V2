@@ -221,7 +221,7 @@
 
       <section class="card">
         {% if webinar %}
-          <p class="lead">Reserve your seat now and get confirmation updates by email and WhatsApp.</p>
+          <p class="lead">Reserve your seat now and get the confirmation on your email shortly.</p>
           {% if webinar.banner_image_url %}
             <img src="{{ webinar.banner_image_url }}" alt="Webinar Banner" class="banner">
           {% endif %}
@@ -373,7 +373,11 @@
         </form>
         {% elif webinar and just_registered %}
           <div class="flash success">
-            Registration successful. Thank you for registering! You will receive webinar confirmation details on your contact channels shortly.
+            {% if registration_updated %}
+              Registration updated. Thank you! We’ll send the webinar confirmation to <strong>{{ registered_email }}</strong> shortly.
+            {% else %}
+              Registration successful. Thank you for registering! We’ll send the webinar confirmation to <strong>{{ registered_email }}</strong> shortly.
+            {% endif %}
           </div>
           <p class="muted">
             If you do not receive a confirmation within a few minutes, please check spam/promotions folder or contact CircuitDigest support.

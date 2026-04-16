@@ -137,20 +137,7 @@ def _rate_limit_check(conn, ip_address: str, email: str, phone_e164: str) -> Non
         raise ValueError("Too many attempts. Please try later.")
 
 
-def _ensure_unique_for_webinar(conn, webinar_config_id: int, email: str, phone_e164: str) -> None:
-    row = conn.execute(
-        """
-        SELECT id FROM webinar_registration
-        WHERE webinar_config_id = ? AND (email = ? OR phone_e164 = ?)
-        LIMIT 1
-        """,
-        (webinar_config_id, email, phone_e164),
-    ).fetchone()
-    if row:
-        raise ValueError("This email or phone is already registered for the active webinar.")
-
-
-def create_registration(form: Dict[str, str], ip_address: str) -> int:
+def create_registration(form: Dict[str, str], ip_address: str) -> Dict[str, Any]:
     webinar = get_active_webinar()
     if not webinar:
         raise ValueError("No active webinar is available for registration.")
@@ -158,44 +145,103 @@ def create_registration(form: Dict[str, str], ip_address: str) -> int:
     payload = validate_registration_form(form)
     with get_webinar_connection() as conn:
         _rate_limit_check(conn, ip_address, payload["email"], payload["phone_e164"])
-        _ensure_unique_for_webinar(
-            conn, webinar["id"], payload["email"], payload["phone_e164"]
-        )
-
-        conn.execute(
+        existing = conn.execute(
             """
-            INSERT INTO webinar_registration (
-                webinar_config_id, full_name, email, phone_e164, city, country,
-                occupation, organization_name, domain_interest, social_linkedin, social_instagram,
-                social_x, social_youtube, social_github, wants_to_present,
-                presentation_topic, presentation_description, terms_accepted, ip_address
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            SELECT id
+            FROM webinar_registration
+            WHERE webinar_config_id = ? AND (email = ? OR phone_e164 = ?)
+            ORDER BY registered_at DESC
+            LIMIT 1
             """,
-            (
-                webinar["id"],
-                payload["full_name"],
-                payload["email"],
-                payload["phone_e164"],
-                payload["city"],
-                payload["country"],
-                payload["occupation"],
-                payload["organization_name"],
-                payload["domain_interest"],
-                payload["social_linkedin"],
-                payload["social_instagram"],
-                payload["social_x"],
-                payload["social_youtube"],
-                payload["social_github"],
-                payload["wants_to_present"],
-                payload["presentation_topic"],
-                payload["presentation_description"],
-                payload["terms_accepted"],
-                ip_address,
-            ),
-        )
-        registration_id = conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+            (webinar["id"], payload["email"], payload["phone_e164"]),
+        ).fetchone()
+
+        updated = False
+        if existing:
+            updated = True
+            registration_id = int(existing["id"])
+            conn.execute(
+                """
+                UPDATE webinar_registration
+                SET
+                    full_name = ?,
+                    email = ?,
+                    phone_e164 = ?,
+                    city = ?,
+                    country = ?,
+                    occupation = ?,
+                    organization_name = ?,
+                    domain_interest = ?,
+                    social_linkedin = ?,
+                    social_instagram = ?,
+                    social_x = ?,
+                    social_youtube = ?,
+                    social_github = ?,
+                    wants_to_present = ?,
+                    presentation_topic = ?,
+                    presentation_description = ?,
+                    terms_accepted = ?,
+                    ip_address = ?,
+                    registered_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                """,
+                (
+                    payload["full_name"],
+                    payload["email"],
+                    payload["phone_e164"],
+                    payload["city"],
+                    payload["country"],
+                    payload["occupation"],
+                    payload["organization_name"],
+                    payload["domain_interest"],
+                    payload["social_linkedin"],
+                    payload["social_instagram"],
+                    payload["social_x"],
+                    payload["social_youtube"],
+                    payload["social_github"],
+                    payload["wants_to_present"],
+                    payload["presentation_topic"],
+                    payload["presentation_description"],
+                    payload["terms_accepted"],
+                    ip_address,
+                    registration_id,
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                INSERT INTO webinar_registration (
+                    webinar_config_id, full_name, email, phone_e164, city, country,
+                    occupation, organization_name, domain_interest, social_linkedin, social_instagram,
+                    social_x, social_youtube, social_github, wants_to_present,
+                    presentation_topic, presentation_description, terms_accepted, ip_address
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    webinar["id"],
+                    payload["full_name"],
+                    payload["email"],
+                    payload["phone_e164"],
+                    payload["city"],
+                    payload["country"],
+                    payload["occupation"],
+                    payload["organization_name"],
+                    payload["domain_interest"],
+                    payload["social_linkedin"],
+                    payload["social_instagram"],
+                    payload["social_x"],
+                    payload["social_youtube"],
+                    payload["social_github"],
+                    payload["wants_to_present"],
+                    payload["presentation_topic"],
+                    payload["presentation_description"],
+                    payload["terms_accepted"],
+                    ip_address,
+                ),
+            )
+            registration_id = conn.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
         conn.commit()
-    return registration_id
+    return {"id": int(registration_id), "email": payload["email"], "updated": updated}
 
 
 def _insert_delivery(
@@ -265,36 +311,126 @@ def send_registration_confirmation(registration_id: int) -> None:
             except WebinarMessagingError as exc:
                 _insert_delivery(conn, registration_id, "email", "confirmation", "failed", error_message=str(exc))
 
-        if not _already_sent(conn, registration_id, "whatsapp", "confirmation"):
-            try:
-                result = send_msg91_whatsapp(
-                    row["phone_e164"],
-                    os.environ.get("WEBINAR_WHATSAPP_TEMPLATE_CONFIRMATION", "event_webinar_confirmation"),
-                    {
-                        "body_1": row["full_name"],
-                        "body_2": row["topic"],
-                        "body_3": f"{row['webinar_date']} {row['webinar_time']}",
-                        "body_4": row["meeting_link"] or "",
-                    },
-                )
-                _insert_delivery(conn, registration_id, "whatsapp", "confirmation", "sent", result["provider_message_id"])
-            except WebinarMessagingError as exc:
-                _insert_delivery(conn, registration_id, "whatsapp", "confirmation", "failed", error_message=str(exc))
-
         conn.commit()
+
+
+def send_admin_test_messages() -> Dict[str, Any]:
+    webinar = get_active_webinar()
+    if not webinar:
+        raise ValueError("No active webinar configured.")
+
+    test_phone = "919688373635"
+    test_email = "editor@circuitdigest.com"
+
+    results: Dict[str, Any] = {
+        "whatsapp": {"to": test_phone, "ok": False},
+        "email": {"to": test_email, "ok": False},
+    }
+
+    try:
+        wa_result = send_msg91_whatsapp(
+            test_phone,
+            os.environ.get("WEBINAR_WHATSAPP_TEMPLATE_CONFIRMATION", "event_webinar_confirmation"),
+            {
+                "var_1": "CircuitDigest Editor (Test)",
+                "var_2": webinar.get("topic") or "",
+                "var_3": f"{webinar.get('webinar_date') or ''} {webinar.get('webinar_time') or ''}",
+            },
+        )
+        results["whatsapp"].update({"ok": True, "provider_message_id": wa_result.get("provider_message_id", "")})
+    except WebinarMessagingError as exc:
+        results["whatsapp"].update({"error": str(exc)})
+
+    try:
+        email_result = send_msg91_email(
+            test_email,
+            os.environ.get("WEBINAR_EMAIL_TEMPLATE_CONFIRMATION", "cd_webinar_confirmation"),
+            {
+                "name": "CircuitDigest Editor (Test)",
+                "topic": webinar.get("topic") or "",
+                "date": webinar.get("webinar_date") or "",
+                "time": webinar.get("webinar_time") or "",
+                "link": webinar.get("meeting_link") or "",
+            },
+        )
+        results["email"].update({"ok": True, "provider_message_id": email_result.get("provider_message_id", "")})
+    except WebinarMessagingError as exc:
+        results["email"].update({"error": str(exc)})
+
+    return results
+
+
+def _resolve_templates(message_type: str) -> Dict[str, str]:
+    return {
+        "email": os.environ.get("WEBINAR_EMAIL_TEMPLATE_" + message_type.upper(), "cd_webinar_reminder"),
+        "whatsapp": os.environ.get(
+            "WEBINAR_WHATSAPP_TEMPLATE_" + message_type.upper(), "event_webinar_reminder"
+        ),
+    }
+
+
+def send_admin_test_reminder(message_type: str) -> Dict[str, Any]:
+    webinar = get_active_webinar()
+    if not webinar:
+        raise ValueError("No active webinar configured.")
+
+    templates = _resolve_templates(message_type)
+    test_phone = "919688373635"
+    test_email = "editor@circuitdigest.com"
+
+    results: Dict[str, Any] = {
+        "message_type": message_type,
+        "templates": templates,
+        "whatsapp": {"to": test_phone, "ok": False},
+        "email": {"to": test_email, "ok": False},
+    }
+
+    try:
+        wa_result = send_msg91_whatsapp(
+            test_phone,
+            templates["whatsapp"],
+            {
+                "var_1": "CircuitDigest Editor (Test)",
+                "var_2": webinar.get("topic") or "",
+                "var_3": f"{webinar.get('webinar_date') or ''} {webinar.get('webinar_time') or ''}",
+            },
+        )
+        results["whatsapp"].update({"ok": True, "provider_message_id": wa_result.get("provider_message_id", "")})
+    except WebinarMessagingError as exc:
+        results["whatsapp"].update({"error": str(exc)})
+
+    try:
+        email_result = send_msg91_email(
+            test_email,
+            templates["email"],
+            {
+                "name": "CircuitDigest Editor (Test)",
+                "topic": webinar.get("topic") or "",
+                "date": webinar.get("webinar_date") or "",
+                "time": webinar.get("webinar_time") or "",
+                "link": webinar.get("meeting_link") or "",
+            },
+        )
+        results["email"].update({"ok": True, "provider_message_id": email_result.get("provider_message_id", "")})
+    except WebinarMessagingError as exc:
+        results["email"].update({"error": str(exc)})
+
+    return results
 
 
 def _message_type_to_delta(message_type: str) -> timedelta:
     if message_type == "reminder_24h":
         return timedelta(hours=24)
-    if message_type == "reminder_1h":
-        return timedelta(hours=1)
     if message_type in ("reminder_live", "reminder_10m_or_live"):
         return timedelta(minutes=10)
     raise ValueError(f"Unsupported message type: {message_type}")
 
 
-def trigger_manual_reminder(message_type: str) -> Dict[str, int]:
+def trigger_manual_reminder(
+    message_type: str,
+    channels: tuple[str, ...] = ("email", "whatsapp"),
+    ignore_already_sent: bool = False,
+) -> Dict[str, int]:
     with get_webinar_connection() as conn:
         webinar = conn.execute(
             "SELECT * FROM webinar_config WHERE is_active = 1 ORDER BY id DESC LIMIT 1"
@@ -309,8 +445,8 @@ def trigger_manual_reminder(message_type: str) -> Dict[str, int]:
         sent_count = 0
         failed_count = 0
         for row in registrations:
-            for channel in ("email", "whatsapp"):
-                if _already_sent(conn, row["id"], channel, message_type):
+            for channel in channels:
+                if (not ignore_already_sent) and _already_sent(conn, row["id"], channel, message_type):
                     continue
                 try:
                     if channel == "email":
@@ -336,10 +472,9 @@ def trigger_manual_reminder(message_type: str) -> Dict[str, int]:
                             row["phone_e164"],
                             template,
                             {
-                                "body_1": row["full_name"],
-                                "body_2": webinar["topic"],
-                                "body_3": f"{webinar['webinar_date']} {webinar['webinar_time']}",
-                                "body_4": webinar["meeting_link"] or "",
+                                "var_1": row["full_name"],
+                                "var_2": webinar["topic"],
+                                "var_3": f"{webinar['webinar_date']} {webinar['webinar_time']}",
                             },
                         )
                     _insert_delivery(
@@ -377,7 +512,7 @@ def run_scheduled_reminders() -> Dict[str, int]:
             (webinar["id"],),
         ).fetchall()
 
-        reminder_types = ("reminder_24h", "reminder_1h", "reminder_live")
+        reminder_types = ("reminder_24h", "reminder_live")
         for reminder_type in reminder_types:
             scheduled_time = event_dt - _message_type_to_delta(reminder_type)
             # 20-minute send window to avoid misses with cron delays.
@@ -411,10 +546,9 @@ def run_scheduled_reminders() -> Dict[str, int]:
                                 row["phone_e164"],
                                 template,
                                 {
-                                    "body_1": row["full_name"],
-                                    "body_2": webinar["topic"],
-                                    "body_3": f"{webinar['webinar_date']} {webinar['webinar_time']}",
-                                    "body_4": webinar["meeting_link"] or "",
+                                    "var_1": row["full_name"],
+                                    "var_2": webinar["topic"],
+                                    "var_3": f"{webinar['webinar_date']} {webinar['webinar_time']}",
                                 },
                             )
                         _insert_delivery(
@@ -496,6 +630,12 @@ def admin_get_dashboard_data() -> Dict[str, Any]:
         config = conn.execute(
             "SELECT * FROM webinar_config WHERE is_active = 1 ORDER BY id DESC LIMIT 1"
         ).fetchone()
+        active_registration_count = 0
+        if config:
+            active_registration_count = conn.execute(
+                "SELECT COUNT(*) AS cnt FROM webinar_registration WHERE webinar_config_id = ?",
+                (config["id"],),
+            ).fetchone()["cnt"]
         registrations = conn.execute(
             """
             SELECT r.*, c.topic
@@ -524,6 +664,7 @@ def admin_get_dashboard_data() -> Dict[str, Any]:
 
     return {
         "config": config,
+        "active_registration_count": active_registration_count,
         "registrations": registrations,
         "stats": stats,
         "deliveries": deliveries,

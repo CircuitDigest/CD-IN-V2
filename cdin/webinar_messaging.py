@@ -17,9 +17,9 @@ def _require_env(name: str) -> str:
 
 def send_msg91_email(to_email: str, template_name: str, variables: Dict[str, Any]) -> Dict[str, Any]:
     auth_key = _require_env("MSG91_EMAIL_AUTHKEY")
-    domain = os.environ.get("MSG91_EMAIL_DOMAIN", "mail.circuitdigest.cloud")
-    from_email = os.environ.get("MSG91_EMAIL_FROM", f"no-reply@{domain}")
-    from_name = os.environ.get("MSG91_EMAIL_FROM_NAME", "CircuitDigest Webinar Team")
+    domain = (os.environ.get("MSG91_EMAIL_DOMAIN") or "").strip() or "mail.circuitdigest.cloud"
+    from_email = (os.environ.get("MSG91_EMAIL_FROM") or "").strip() or f"no-reply@{domain}"
+    from_name = (os.environ.get("MSG91_EMAIL_FROM_NAME") or "").strip() or "CircuitDigest Webinar Team"
     to_name = str(variables.get("name") or "Participant")
 
     payload = {
@@ -52,6 +52,29 @@ def send_msg91_whatsapp(phone_e164: str, template_name: str, params: Dict[str, A
     integrated_number = _require_env("MSG91_WHATSAPP_NUMBER")
     namespace = os.environ.get("MSG91_WHATSAPP_TEMPLATE_NAMESPACE", "").strip()
 
+    # MSG91 supports multiple variable naming schemes depending on how the template
+    # was created. We support both:
+    # - legacy: body_1..body_4
+    # - named:  body_var_1..body_var_N with parameter_name var_1..var_N
+    if any(k.startswith("var_") for k in params.keys()):
+        components: Dict[str, Any] = {}
+        for i in range(1, 9):
+            key = f"var_{i}"
+            if key not in params:
+                continue
+            components[f"body_var_{i}"] = {
+                "type": "text",
+                "value": str(params.get(key, "")),
+                "parameter_name": key,
+            }
+    else:
+        components = {
+            "body_1": {"type": "text", "value": str(params.get("body_1", ""))},
+            "body_2": {"type": "text", "value": str(params.get("body_2", ""))},
+            "body_3": {"type": "text", "value": str(params.get("body_3", ""))},
+            "body_4": {"type": "text", "value": str(params.get("body_4", ""))},
+        }
+
     payload = {
         "integrated_number": integrated_number,
         "content_type": "template",
@@ -64,12 +87,7 @@ def send_msg91_whatsapp(phone_e164: str, template_name: str, params: Dict[str, A
                 "to_and_components": [
                     {
                         "to": [phone_e164],
-                        "components": {
-                            "body_1": {"type": "text", "value": str(params.get("body_1", ""))},
-                            "body_2": {"type": "text", "value": str(params.get("body_2", ""))},
-                            "body_3": {"type": "text", "value": str(params.get("body_3", ""))},
-                            "body_4": {"type": "text", "value": str(params.get("body_4", ""))},
-                        },
+                        "components": components,
                     }
                 ],
             },

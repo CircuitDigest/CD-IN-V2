@@ -124,20 +124,72 @@
 
       <section class="card">
         <h2>Messaging</h2>
+        <div class="muted" style="margin:-0.15rem 0 0.7rem;">
+          Manual sends go to <strong>{{ active_registration_count or 0 }}</strong> registrations for the currently active webinar.
+        </div>
+        <details style="margin:0 0 0.9rem;">
+          <summary style="cursor:pointer;font-weight:700;color:#0f172a;">MSG91 Diagnostics (local)</summary>
+          <div style="margin-top:0.6rem;">
+            <div style="font-weight:700;margin-bottom:0.35rem;">Environment</div>
+            <ul style="margin:0;padding-left:1.2rem;color:#334155;font-size:0.9rem;">
+              {% for k, ok in msg91_diag.env.items() %}
+                <li>{{ k }}: {% if ok %}<span style="color:#166534;font-weight:700;">set</span>{% else %}<span style="color:#991b1b;font-weight:700;">missing</span>{% endif %}</li>
+              {% endfor %}
+            </ul>
+            <div style="font-weight:700;margin:0.75rem 0 0.35rem;">Resolved reminder templates</div>
+            <ul style="margin:0;padding-left:1.2rem;color:#334155;font-size:0.9rem;">
+              {% for rt, tpl in msg91_diag.templates.items() %}
+                <li>
+                  {{ rt }}:
+                  WA=<span style="font-weight:700;">{{ tpl.whatsapp }}</span>,
+                  Email=<span style="font-weight:700;">{{ tpl.email }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+            <div style="font-weight:700;margin:0.75rem 0 0.35rem;">Network reachability</div>
+            <ul style="margin:0;padding-left:1.2rem;color:#334155;font-size:0.9rem;">
+              {% for name, info in msg91_diag.network.items() %}
+                <li>
+                  {{ name }}:
+                  {% if info.ok %}
+                    <span style="color:#166534;font-weight:700;">reachable</span> (HTTP {{ info.status }})
+                  {% else %}
+                    <span style="color:#991b1b;font-weight:700;">unreachable</span> ({{ info.error }})
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </details>
         <form method="post" class="inline">
           <input type="hidden" name="action" value="manual_reminder">
+          <input type="hidden" name="channel" value="whatsapp">
           <input type="hidden" name="reminder_type" value="reminder_24h">
-          <button type="submit">Send 24h Reminder</button>
+          <button type="submit">Send 24h WhatsApp</button>
         </form>
         <form method="post" class="inline">
           <input type="hidden" name="action" value="manual_reminder">
+          <input type="hidden" name="channel" value="email">
+          <input type="hidden" name="reminder_type" value="reminder_24h">
+          <button type="submit">Send 24h Email</button>
+        </form>
+        <form method="post" class="inline">
+          <input type="hidden" name="action" value="manual_reminder">
+          <input type="hidden" name="channel" value="email">
           <input type="hidden" name="reminder_type" value="reminder_1h">
-          <button type="submit">Send 1h Reminder</button>
+          <button type="submit">Send 1h Email</button>
         </form>
         <form method="post" class="inline">
           <input type="hidden" name="action" value="manual_reminder">
+          <input type="hidden" name="channel" value="whatsapp">
           <input type="hidden" name="reminder_type" value="reminder_live">
-          <button type="submit">Send Live Reminder</button>
+          <button type="submit">Send Live WhatsApp</button>
+        </form>
+        <form method="post" class="inline">
+          <input type="hidden" name="action" value="manual_reminder">
+          <input type="hidden" name="channel" value="email">
+          <input type="hidden" name="reminder_type" value="reminder_live">
+          <button type="submit">Send Live Email</button>
         </form>
         <form method="post" class="inline">
           <input type="hidden" name="action" value="run_scheduler_now">
