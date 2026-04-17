@@ -41,6 +41,49 @@
       .stat-value { font-size: 1.3rem; font-weight: 700; color: #0f172a; }
       @media (min-width: 760px) { .stat-grid { grid-template-columns: 1fr 1fr 1fr; } }
       .inline { display: inline; }
+      .analytics-grid { display: grid; gap: 1rem; margin-top: 0.75rem; }
+      @media (min-width: 920px) {
+        .analytics-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+      }
+      .analytics-block h3 {
+        margin: 0 0 0.45rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: minmax(5.5rem, 7.5rem) 1fr auto;
+        align-items: center;
+        gap: 0.35rem 0.45rem;
+        font-size: 0.78rem;
+        margin-bottom: 0.32rem;
+      }
+      .bar-label { color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .bar-track { height: 0.5rem; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+      .bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); border-radius: 99px; min-width: 2px; }
+      .bar-count { color: #64748b; font-variant-numeric: tabular-nums; font-size: 0.76rem; }
+      .social-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.45rem 0.75rem;
+        font-size: 0.82rem;
+        margin-top: 0.35rem;
+      }
+      @media (min-width: 520px) { .social-summary { grid-template-columns: 1fr 1fr 1fr; } }
+      .social-pill {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.4rem 0.5rem;
+        background: #f8fafc;
+      }
+      .social-pill strong { display: block; color: #0f172a; font-size: 1rem; }
+      .social-pill span { color: #64748b; font-size: 0.72rem; }
+      .sort-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+      .sort-toolbar label { margin: 0; font-size: 0.82rem; }
+      .sort-toolbar select { width: auto; min-width: 14rem; max-width: 100%; }
     </style>
   </head>
   <body>
@@ -62,6 +105,61 @@
           <div class="stat-card"><div class="stat-label">Wants To Present</div><div class="stat-value">{{ stats.presenters if stats else 0 }}</div></div>
           <div class="stat-card"><div class="stat-label">Distinct Webinar Sessions</div><div class="stat-value">{{ stats.webinar_sessions if stats else 0 }}</div></div>
         </div>
+
+        {% if webinar_analytics and webinar_analytics.total %}
+          <p style="margin:1rem 0 0;font-size:0.86rem;color:#475569;">
+            <strong>Active session</strong> ({{ webinar_analytics.total }} registrants): breakdowns below use only this webinar.
+          </p>
+          <div class="analytics-grid three">
+            <div class="analytics-block">
+              <h3>Country</h3>
+              {% for row in webinar_analytics.country %}
+                <div class="bar-row">
+                  <span class="bar-label" title="{{ row.label }}">{{ row.label }}</span>
+                  <div class="bar-track"><div class="bar-fill" style="width: {{ row.pct }}%;"></div></div>
+                  <span class="bar-count">{{ row.count }} ({{ row.pct }}%)</span>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="analytics-block">
+              <h3>Occupation</h3>
+              {% for row in webinar_analytics.occupation %}
+                <div class="bar-row">
+                  <span class="bar-label" title="{{ row.label }}">{{ row.label }}</span>
+                  <div class="bar-track"><div class="bar-fill" style="width: {{ row.pct }}%;"></div></div>
+                  <span class="bar-count">{{ row.count }} ({{ row.pct }}%)</span>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="analytics-block">
+              <h3>Domain of interest</h3>
+              {% for row in webinar_analytics.domain_interest %}
+                <div class="bar-row">
+                  <span class="bar-label" title="{{ row.label }}">{{ row.label }}</span>
+                  <div class="bar-track"><div class="bar-fill" style="width: {{ row.pct }}%;"></div></div>
+                  <span class="bar-count">{{ row.count }} ({{ row.pct }}%)</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="analytics-block" style="margin-top:1rem;">
+            <h3>Social handles</h3>
+            <p style="margin:0 0 0.35rem;font-size:0.82rem;color:#64748b;">
+              {{ webinar_analytics.social.any_channel }} of {{ webinar_analytics.total }} people shared at least one profile link.
+            </p>
+            <div class="social-summary">
+              <div class="social-pill"><strong>{{ webinar_analytics.social.linkedin }}</strong><span>LinkedIn</span></div>
+              <div class="social-pill"><strong>{{ webinar_analytics.social.instagram }}</strong><span>Instagram</span></div>
+              <div class="social-pill"><strong>{{ webinar_analytics.social.x }}</strong><span>X</span></div>
+              <div class="social-pill"><strong>{{ webinar_analytics.social.youtube }}</strong><span>YouTube</span></div>
+              <div class="social-pill"><strong>{{ webinar_analytics.social.github }}</strong><span>GitHub</span></div>
+            </div>
+          </div>
+        {% elif config %}
+          <p style="margin:1rem 0 0;font-size:0.86rem;color:#64748b;">No registrations yet for the active session — charts will appear once people sign up.</p>
+        {% else %}
+          <p style="margin:1rem 0 0;font-size:0.86rem;color:#64748b;">Activate a webinar to see session-level analytics.</p>
+        {% endif %}
       </section>
 
       <section class="card">
@@ -101,7 +199,14 @@
             </div>
             <div>
               <label for="banner_image">Banner Image</label>
-              <input id="banner_image" name="banner_image" type="file" accept="image/*">
+              <input id="banner_image" name="banner_image" type="file" accept="image/jpeg,image/png,image/webp">
+              <p style="margin:0.35rem 0 0;font-size:0.78rem;color:#64748b;line-height:1.45;">
+                Displayed on the public registration page above the form.<br>
+                Recommended: <strong>1600 × 900&nbsp;px</strong> (16:9),
+                minimum <strong>1200 × 675&nbsp;px</strong>. Use <strong>JPG</strong>, <strong>PNG</strong>, or <strong>WebP</strong>,
+                keep the file under <strong>500&nbsp;KB</strong>, and place key text/logo within the centre 80%
+                so nothing is cropped on mobile.
+              </p>
             </div>
           </div>
           <div class="row">
@@ -217,12 +322,27 @@
 
       <section class="card">
         <h2>Registrations</h2>
+        <form method="get" class="sort-toolbar" action="{{ url_for('webinar_bp.admin_webinar') }}">
+          <label for="sort">Sort by</label>
+          <select id="sort" name="sort" onchange="this.form.submit()">
+            <option value="registered_desc" {% if registration_sort == 'registered_desc' %}selected{% endif %}>Registered (newest first)</option>
+            <option value="registered_asc" {% if registration_sort == 'registered_asc' %}selected{% endif %}>Registered (oldest first)</option>
+            <option value="name_asc" {% if registration_sort == 'name_asc' %}selected{% endif %}>Name (A–Z)</option>
+            <option value="country_asc" {% if registration_sort == 'country_asc' %}selected{% endif %}>Country (A–Z)</option>
+            <option value="occupation_asc" {% if registration_sort == 'occupation_asc' %}selected{% endif %}>Occupation (A–Z)</option>
+            <option value="domain_asc" {% if registration_sort == 'domain_asc' %}selected{% endif %}>Domain of interest (A–Z)</option>
+            <option value="webinar_topic_asc" {% if registration_sort == 'webinar_topic_asc' %}selected{% endif %}>Webinar theme (A–Z)</option>
+            <option value="presentation_asc" {% if registration_sort == 'presentation_asc' %}selected{% endif %}>Presentation title (A–Z)</option>
+          </select>
+        </form>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Registered At</th><th>Name</th><th>Email</th><th>Phone</th>
-                <th>Occupation</th><th>Institute/Company</th><th>Domain Interest</th><th>Social Profiles</th><th>Presenter</th><th>Topic</th><th>Actions</th>
+                <th>Country</th>
+                <th>Occupation</th><th>Institute/Company</th><th>Domain Interest</th><th>Social Profiles</th><th>Presenter</th>
+                <th>Webinar theme</th><th>Presentation</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -232,6 +352,7 @@
                   <td>{{ r.full_name }}</td>
                   <td>{{ r.email }}</td>
                   <td>{{ r.phone_e164 }}</td>
+                  <td>{{ r.country or '—' }}</td>
                   <td>{{ r.occupation }}</td>
                   <td>{{ r.organization_name }}</td>
                   <td>{{ r.domain_interest }}</td>
@@ -240,12 +361,14 @@
                     {% if r.social_instagram %}<div>Instagram: {{ r.social_instagram }}</div>{% endif %}
                     {% if r.social_x %}<div>X: {{ r.social_x }}</div>{% endif %}
                     {% if r.social_youtube %}<div>YouTube: {{ r.social_youtube }}</div>{% endif %}
-                    {% if not r.social_linkedin and not r.social_instagram and not r.social_x and not r.social_youtube %}
+                    {% if r.social_github %}<div>GitHub: {{ r.social_github }}</div>{% endif %}
+                    {% if not r.social_linkedin and not r.social_instagram and not r.social_x and not r.social_youtube and not r.social_github %}
                       <span style="color:#64748b;">-</span>
                     {% endif %}
                   </td>
                   <td>{% if r.wants_to_present %}Yes{% else %}No{% endif %}</td>
-                  <td>{{ r.topic or '-' }}</td>
+                  <td>{{ r.topic or '—' }}</td>
+                  <td>{{ r.presentation_topic or '—' }}</td>
                   <td>
                     <form method="post" action="{{ url_for('webinar_bp.delete_webinar_registration', registration_id=r.id) }}" class="inline" onsubmit="return confirm('Delete this registration?');">
                       <button class="btn-danger" type="submit">Delete</button>
@@ -258,7 +381,7 @@
                   </td>
                 </tr>
               {% else %}
-                <tr><td colspan="11" style="color:#64748b;">No registrations yet.</td></tr>
+                <tr><td colspan="13" style="color:#64748b;">No registrations yet.</td></tr>
               {% endfor %}
             </tbody>
           </table>

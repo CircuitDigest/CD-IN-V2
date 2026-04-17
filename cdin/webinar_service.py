@@ -1,7 +1,8 @@
 import re
 import os
+import sqlite3
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .webinar_db import get_webinar_connection
 from .webinar_messaging import WebinarMessagingError, send_msg91_email, send_msg91_whatsapp
@@ -647,23 +648,161 @@ def admin_save_webinar_config(form: Dict[str, str], banner_url: str = "") -> Non
         conn.commit()
 
 
-def admin_get_dashboard_data() -> Dict[str, Any]:
+_REGISTRATION_ORDER_BY = {
+    "registered_desc": "r.registered_at DESC, r.id DESC",
+    "registered_asc": "r.registered_at ASC, r.id ASC",
+    "name_asc": "LOWER(r.full_name) ASC, r.id ASC",
+    "country_asc": "LOWER(COALESCE(r.country, '')) ASC, LOWER(r.full_name) ASC, r.id ASC",
+    "occupation_asc": "LOWER(COALESCE(r.occupation, '')) ASC, LOWER(r.full_name) ASC, r.id ASC",
+    "domain_asc": "LOWER(COALESCE(r.domain_interest, '')) ASC, LOWER(r.full_name) ASC, r.id ASC",
+    "webinar_topic_asc": "LOWER(COALESCE(c.topic, '')) ASC, r.registered_at DESC, r.id DESC",
+    "presentation_asc": "LOWER(COALESCE(r.presentation_topic, '')) ASC, LOWER(r.full_name) ASC, r.id ASC",
+}
+
+
+def normalize_registration_sort(sort_key: Optional[str]) -> str:
+    if sort_key and sort_key in _REGISTRATION_ORDER_BY:
+        return sort_key
+    return "registered_desc"
+
+
+def _bucket_label_expr(column: str) -> str:
+    return (
+        f"CASE WHEN COALESCE(TRIM({column}), '') = '' THEN '(not set)' "
+        f"ELSE TRIM({column}) END"
+    )
+
+
+def _breakdown_for_column(
+    conn: sqlite3.Connection, webinar_config_id: int, column: str, top_n: int = 12
+) -> List[Dict[str, Any]]:
+    label_sql = _bucket_label_expr(column)
+    rows = conn.execute(
+        f"""
+        SELECT {label_sql} AS label, COUNT(*) AS cnt
+        FROM webinar_registration
+        WHERE webinar_config_id = ?
+        GROUP BY label
+        ORDER BY cnt DESC, label ASC
+        """,
+        (webinar_config_id,),
+    ).fetchall()
+    total = sum(int(r["cnt"]) for r in rows)
+    if not total:
+        return []
+    out: List[Dict[str, Any]] = []
+    if len(rows) <= top_n:
+        for r in rows:
+            cnt = int(r["cnt"])
+            out.append(
+                {
+                    "label": r["label"],
+                    "count": cnt,
+                    "pct": round((cnt / total) * 100, 1),
+                }
+            )
+        return out
+    for r in rows[:top_n]:
+        cnt = int(r["cnt"])
+        out.append(
+            {
+                "label": r["label"],
+                "count": cnt,
+                "pct": round((cnt / total) * 100, 1),
+            }
+        )
+    other_count = sum(int(r["cnt"]) for r in rows[top_n:])
+    if other_count:
+        out.append(
+            {
+                "label": "Other",
+                "count": other_count,
+                "pct": round((other_count / total) * 100, 1),
+            }
+        )
+    return out
+
+
+def _active_webinar_analytics(conn: sqlite3.Connection, webinar_config_id: int) -> Dict[str, Any]:
+    total_row = conn.execute(
+        "SELECT COUNT(*) AS cnt FROM webinar_registration WHERE webinar_config_id = ?",
+        (webinar_config_id,),
+    ).fetchone()
+    total = int(total_row["cnt"] or 0)
+    if total == 0:
+        return {
+            "total": 0,
+            "country": [],
+            "occupation": [],
+            "domain_interest": [],
+            "social": {
+                "linkedin": 0,
+                "instagram": 0,
+                "x": 0,
+                "youtube": 0,
+                "github": 0,
+                "any_channel": 0,
+            },
+        }
+
+    social = conn.execute(
+        """
+        SELECT
+            SUM(CASE WHEN COALESCE(TRIM(social_linkedin), '') != '' THEN 1 ELSE 0 END) AS linkedin,
+            SUM(CASE WHEN COALESCE(TRIM(social_instagram), '') != '' THEN 1 ELSE 0 END) AS instagram,
+            SUM(CASE WHEN COALESCE(TRIM(social_x), '') != '' THEN 1 ELSE 0 END) AS x,
+            SUM(CASE WHEN COALESCE(TRIM(social_youtube), '') != '' THEN 1 ELSE 0 END) AS youtube,
+            SUM(CASE WHEN COALESCE(TRIM(social_github), '') != '' THEN 1 ELSE 0 END) AS github,
+            SUM(CASE
+                WHEN COALESCE(TRIM(social_linkedin), '') != ''
+                  OR COALESCE(TRIM(social_instagram), '') != ''
+                  OR COALESCE(TRIM(social_x), '') != ''
+                  OR COALESCE(TRIM(social_youtube), '') != ''
+                  OR COALESCE(TRIM(social_github), '') != ''
+                THEN 1 ELSE 0 END) AS any_channel
+        FROM webinar_registration
+        WHERE webinar_config_id = ?
+        """,
+        (webinar_config_id,),
+    ).fetchone()
+
+    return {
+        "total": total,
+        "country": _breakdown_for_column(conn, webinar_config_id, "country"),
+        "occupation": _breakdown_for_column(conn, webinar_config_id, "occupation"),
+        "domain_interest": _breakdown_for_column(conn, webinar_config_id, "domain_interest"),
+        "social": {
+            "linkedin": int(social["linkedin"] or 0),
+            "instagram": int(social["instagram"] or 0),
+            "x": int(social["x"] or 0),
+            "youtube": int(social["youtube"] or 0),
+            "github": int(social["github"] or 0),
+            "any_channel": int(social["any_channel"] or 0),
+        },
+    }
+
+
+def admin_get_dashboard_data(sort_key: Optional[str] = None) -> Dict[str, Any]:
+    sort = normalize_registration_sort(sort_key)
+    order_by = _REGISTRATION_ORDER_BY[sort]
     with get_webinar_connection() as conn:
         config = conn.execute(
             "SELECT * FROM webinar_config WHERE is_active = 1 ORDER BY id DESC LIMIT 1"
         ).fetchone()
         active_registration_count = 0
+        webinar_analytics: Optional[Dict[str, Any]] = None
         if config:
             active_registration_count = conn.execute(
                 "SELECT COUNT(*) AS cnt FROM webinar_registration WHERE webinar_config_id = ?",
                 (config["id"],),
             ).fetchone()["cnt"]
+            webinar_analytics = _active_webinar_analytics(conn, int(config["id"]))
         registrations = conn.execute(
-            """
+            f"""
             SELECT r.*, c.topic
             FROM webinar_registration r
             LEFT JOIN webinar_config c ON c.id = r.webinar_config_id
-            ORDER BY r.registered_at DESC
+            ORDER BY {order_by}
             """
         ).fetchall()
         stats = conn.execute(
@@ -690,4 +829,6 @@ def admin_get_dashboard_data() -> Dict[str, Any]:
         "registrations": registrations,
         "stats": stats,
         "deliveries": deliveries,
+        "webinar_analytics": webinar_analytics,
+        "registration_sort": sort,
     }

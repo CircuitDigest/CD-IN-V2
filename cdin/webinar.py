@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, send_from_directory, session, url_for
 import requests
@@ -31,27 +31,59 @@ def _webinar_display_meta(webinar):
 
     date_raw = (webinar.get("webinar_date") or "").strip()
     time_raw = (webinar.get("webinar_time") or "").strip()
+    duration_raw = webinar.get("duration_minutes")
+
     date_display = date_raw
     day_display = ""
+    day_number = ""
+    month_short = ""
+    year_display = ""
     time_display = time_raw
+    time_end_display = ""
+    duration_display = ""
 
     try:
         parsed_date = datetime.strptime(date_raw, "%Y-%m-%d")
         date_display = parsed_date.strftime("%d %b %Y")
         day_display = parsed_date.strftime("%A")
+        day_number = parsed_date.strftime("%d").lstrip("0") or "0"
+        month_short = parsed_date.strftime("%b").upper()
+        year_display = parsed_date.strftime("%Y")
     except ValueError:
-        pass
+        parsed_date = None
 
+    parsed_time = None
     try:
         parsed_time = datetime.strptime(time_raw, "%H:%M")
-        time_display = parsed_time.strftime("%I:%M %p")
+        time_display = parsed_time.strftime("%I:%M %p").lstrip("0")
     except ValueError:
-        pass
+        parsed_time = None
+
+    if parsed_time is not None and duration_raw:
+        try:
+            minutes = int(duration_raw)
+        except (TypeError, ValueError):
+            minutes = 0
+        if minutes > 0:
+            end = parsed_time + timedelta(minutes=minutes)
+            time_end_display = end.strftime("%I:%M %p").lstrip("0")
+            hours, rem_min = divmod(minutes, 60)
+            if hours and rem_min:
+                duration_display = f"{hours} hr {rem_min} min"
+            elif hours:
+                duration_display = f"{hours} hr"
+            else:
+                duration_display = f"{rem_min} min"
 
     return {
         "date_display": date_display,
         "day_display": day_display,
+        "day_number": day_number,
+        "month_short": month_short,
+        "year_display": year_display,
         "time_display": time_display,
+        "time_end_display": time_end_display,
+        "duration_display": duration_display,
     }
 
 
@@ -231,7 +263,8 @@ def admin_webinar():
             message = str(exc)
             message_type = "error"
 
-    dashboard = admin_get_dashboard_data()
+    sort_param = request.args.get("sort", "").strip() or None
+    dashboard = admin_get_dashboard_data(sort_key=sort_param)
     return render_template(
         "admin_webinar.html",
         config=dashboard["config"],
@@ -240,6 +273,8 @@ def admin_webinar():
         registrations=dashboard["registrations"],
         stats=dashboard["stats"],
         deliveries=dashboard["deliveries"],
+        webinar_analytics=dashboard.get("webinar_analytics"),
+        registration_sort=dashboard.get("registration_sort", "registered_desc"),
         msg91_diag=_msg91_diagnostics(),
         message=message,
         message_type=message_type,

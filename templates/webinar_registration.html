@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Webinar Registration - CircuitDigest</title>
+    <title>Community Webinar Registration · CircuitDigest</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
@@ -26,63 +26,63 @@
         color: var(--text-primary);
       }
       .page {
-        max-width: 560px;
+        max-width: 640px;
         margin: 0 auto;
-        padding: 12px 10px 24px;
+        padding: 0 14px 24px;
       }
-      .brand-card {
-        color: var(--text-primary);
-        padding: 4px 6px 10px;
-        margin-bottom: 8px;
-        text-align: center;
-      }
-      .brand-top {
+      .site-header {
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin-bottom: 6px;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 0 12px;
+        border-bottom: 1px solid #e5edf5;
       }
-      .brand-top a { display: inline-flex; line-height: 0; }
-      .brand-top img {
-        width: 156px;
-        height: 40px;
+      .site-header__logo { display: inline-flex; line-height: 0; flex-shrink: 0; }
+      .site-header__logo img {
+        height: 34px;
+        width: auto;
         object-fit: contain;
-        object-position: center;
       }
-      .heading {
-        font-size: 0.88rem;
-        font-weight: 500;
-        margin-bottom: 6px;
+      .site-header__tagline {
+        font-size: 0.78rem;
+        font-weight: 600;
         color: var(--site-navy);
-        letter-spacing: 0.15px;
+        text-align: right;
+        line-height: 1.35;
+        letter-spacing: 0.01em;
       }
-      .heading-note {
-        font-size: 0.72rem;
-        font-weight: 400;
-        line-height: 1.45;
+      .hero {
+        text-align: center;
+        padding: 22px 6px 18px;
+      }
+      .hero__title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.2;
+        color: var(--site-navy);
+        margin: 0 auto;
+        white-space: nowrap;
+        letter-spacing: -0.005em;
+      }
+      .hero__subtitle {
+        font-size: 0.85rem;
         color: var(--text-secondary);
-        max-width: 28em;
-        margin: 0 auto 10px;
-        padding: 0 4px;
+        line-height: 1.55;
+        max-width: 40ch;
+        margin: 8px auto 0;
       }
-      .chip-row {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        margin: 0 -10px 10px;
-        padding: 0 10px;
-        background: var(--site-navy);
-        border-bottom: 1px solid rgba(255,255,255,0.15);
+      @media (max-width: 479px) {
+        .site-header { flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 14px 0 10px; }
+        .site-header__tagline { text-align: center; font-size: 0.74rem; }
+        .hero { padding: 18px 4px 14px; }
+        .hero__title { font-size: 1.18rem; }
+        .hero__subtitle { font-size: 0.82rem; }
       }
-      .chip {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: rgba(255,255,255,0.93);
-        padding: 8px 9px 8px;
-        font-size: 0.79rem;
-        font-weight: 500;
-        border-bottom: 2px solid #ffffff;
+      @media (min-width: 760px) {
+        .hero__title { font-size: 1.8rem; }
+        .site-header__logo img { height: 38px; }
+        .site-header__tagline { font-size: 0.84rem; }
       }
       .event-panel {
         background: #ffffff;
@@ -109,33 +109,84 @@
         display: inline-block;
       }
       .event-title {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         font-size: 1.1rem;
         font-weight: 800;
         line-height: 1.35;
         color: #1e293b;
       }
-      .event-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 6px;
+      .event-description {
+        font-size: 0.88rem;
+        line-height: 1.55;
+        color: #334155;
+        margin: 0 0 12px;
+        white-space: pre-line;
       }
-      .meta-pill {
-        border-radius: 999px;
-        padding: 6px 12px;
+      .schedule {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 12px;
+        align-items: stretch;
+        padding: 10px;
+        border: 1px solid #dbe4ef;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      }
+      .schedule-date {
+        min-width: 68px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: var(--site-navy);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1;
+      }
+      .schedule-date .month {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        opacity: 0.95;
+      }
+      .schedule-date .day {
+        font-size: 1.85rem;
+        font-weight: 800;
+        margin: 3px 0 2px;
+      }
+      .schedule-date .year {
+        font-size: 0.7rem;
+        font-weight: 500;
+        opacity: 0.85;
+        letter-spacing: 0.08em;
+      }
+      .schedule-meta {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+      }
+      .schedule-weekday {
         font-size: 0.78rem;
         font-weight: 700;
-        letter-spacing: 0.01em;
-        border: 1px solid #c5d3e4;
-        color: #334155;
-        background: #fff;
+        color: var(--site-navy);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
       }
-      .meta-pill.primary {
-        background: var(--site-navy);
-        border-color: var(--site-navy);
-        color: #fff;
+      .schedule-time {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.35;
       }
+      .schedule-duration {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+      }
+      .schedule-duration .dot { margin: 0 6px; color: #cbd5e1; }
       .card {
         background: #fff;
         border: 1px solid #e2e8f0;
@@ -191,32 +242,48 @@
   </head>
   <body>
     <main class="page">
-      <header class="brand-card">
-        <div class="brand-top">
-          <a href="https://circuitdigest.com" target="_blank" rel="noopener noreferrer">
-            <img src="https://circuitdigest.com/sites/default/files/inline-images/logo_circuitdigest.png" alt="CircuitDigest">
-          </a>
-        </div>
-        <h1 class="heading">India's Largest Electronics Engineering Community</h1>
-        <p class="heading-note">Trusted by millions, delivering open-source content with schematics, code, and documentation.</p>
+      <header class="site-header">
+        <a class="site-header__logo" href="https://circuitdigest.com" target="_blank" rel="noopener noreferrer" aria-label="CircuitDigest home">
+          <img src="https://circuitdigest.com/sites/default/files/inline-images/logo_circuitdigest.png" alt="CircuitDigest">
+        </a>
+        <p class="site-header__tagline">India's Leading Electronics<br>Engineering Community</p>
       </header>
-      <nav class="chip-row" aria-label="Webinar section">
-        <span class="chip">Community Webinar Registration</span>
-      </nav>
+      <section class="hero">
+        <h1 class="hero__title">Community Webinar Registration</h1>
+        <p class="hero__subtitle">Join our next live session to learn, build, and connect with fellow engineers.</p>
+      </section>
       <section class="event-panel">
         <h2 class="section-title">Upcoming Session</h2>
         {% if webinar %}
           <div class="event-title">{{ webinar.topic }}</div>
-          <div class="event-meta">
-            <div class="meta-pill primary">{{ webinar_meta.day_display or 'Upcoming' }}</div>
-            <div class="meta-pill">{{ webinar_meta.date_display or webinar.webinar_date }}</div>
-            <div class="meta-pill">{{ webinar_meta.time_display or webinar.webinar_time }}</div>
+          {% if webinar.description %}
+            <p class="event-description">{{ webinar.description }}</p>
+          {% endif %}
+          <div class="schedule" aria-label="Webinar schedule">
+            <div class="schedule-date" aria-hidden="true">
+              <span class="month">{{ webinar_meta.month_short or '—' }}</span>
+              <span class="day">{{ webinar_meta.day_number or '—' }}</span>
+              <span class="year">{{ webinar_meta.year_display or '' }}</span>
+            </div>
+            <div class="schedule-meta">
+              <span class="schedule-weekday">{{ webinar_meta.day_display or 'Upcoming' }}</span>
+              <span class="schedule-time">
+                {{ webinar_meta.time_display or webinar.webinar_time }}{% if webinar_meta.time_end_display %} – {{ webinar_meta.time_end_display }}{% endif %} IST
+              </span>
+              {% if webinar_meta.duration_display %}
+                <span class="schedule-duration">
+                  <span>{{ webinar_meta.date_display or webinar.webinar_date }}</span>
+                  <span class="dot">•</span>
+                  <span>{{ webinar_meta.duration_display }} session</span>
+                </span>
+              {% else %}
+                <span class="schedule-duration">{{ webinar_meta.date_display or webinar.webinar_date }}</span>
+              {% endif %}
+            </div>
           </div>
         {% else %}
           <div class="event-title">Webinar Registration</div>
-          <div class="event-meta">
-            <div class="meta-pill">No active webinar right now</div>
-          </div>
+          <p class="event-description">No active webinar right now. Please check back soon.</p>
         {% endif %}
       </section>
 
