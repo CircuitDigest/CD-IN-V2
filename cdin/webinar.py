@@ -122,7 +122,8 @@ def webinar_registration():
             result = create_registration(
                 form_data, request.headers.get("X-Forwarded-For", request.remote_addr or "")
             )
-            send_registration_confirmation(int(result["id"]))
+            # On update, force resend so user always receives latest confirmation email.
+            send_registration_confirmation(int(result["id"]), force=bool(result.get("updated")))
             return redirect(
                 url_for(
                     "webinar_bp.webinar_registration_pretty",

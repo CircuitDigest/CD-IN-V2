@@ -177,6 +177,7 @@
       .flash.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
       .hidden { display: none; }
       .banner { width: 100%; border-radius: 10px; border: 1px solid #dbe4ef; margin-bottom: 0.9rem; }
+      .required-mark { color: #dc2626; margin-left: 0.2rem; font-weight: 700; }
       @media (min-width: 760px) {
         .page {
           max-width: 740px;
@@ -240,22 +241,22 @@
           <input type="text" name="website" class="hidden" tabindex="-1" autocomplete="off">
           <div class="row two">
             <div>
-              <label for="full_name">Full Name</label>
+              <label for="full_name">Full Name<span class="required-mark">*</span></label>
               <input id="full_name" name="full_name" type="text" autocomplete="name" value="{{ form_data.get('full_name', '') }}" required>
             </div>
             <div>
-              <label for="email">Email</label>
+              <label for="email">Email<span class="required-mark">*</span></label>
               <input id="email" name="email" type="email" autocomplete="email" value="{{ form_data.get('email', '') }}" required>
             </div>
           </div>
 
           <div class="row two">
             <div>
-              <label for="phone">Phone Number</label>
+              <label for="phone">Phone Number<span class="required-mark">*</span></label>
               <input id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit mobile number" value="{{ form_data.get('phone', '') }}" required>
             </div>
             <div>
-              <label for="occupation">Occupation</label>
+              <label for="occupation">Occupation<span class="required-mark">*</span></label>
               <select id="occupation" name="occupation" required>
                 <option value="">Select occupation</option>
                 <option {% if form_data.get('occupation') == 'Student' %}selected{% endif %}>Student</option>
@@ -270,7 +271,7 @@
 
           <div class="row two">
             <div>
-              <label for="domain_interest">Domain of Interest</label>
+              <label for="domain_interest">Domain of Interest<span class="required-mark">*</span></label>
               <select id="domain_interest" name="domain_interest" required>
                 <option value="">Select domain</option>
                 <option {% if form_data.get('domain_interest') == 'Embedded Systems' %}selected{% endif %}>Embedded Systems</option>
@@ -290,7 +291,7 @@
 
           <div class="row two">
             <div>
-              <label for="country">Country</label>
+              <label for="country">Country<span class="required-mark">*</span></label>
               <select id="country" name="country" autocomplete="country-name" required>
                 <option value="">Select country</option>
                 <option {% if form_data.get('country') == 'India' %}selected{% endif %}>India</option>
@@ -309,7 +310,7 @@
 
           <div class="row">
             <div>
-              <label id="organization_label" for="organization_name">Company / Organization Name</label>
+              <label id="organization_label" for="organization_name">Company / Organization Name<span class="required-mark">*</span></label>
               <input id="organization_name" name="organization_name" type="text" autocomplete="organization" placeholder="Your company name" value="{{ form_data.get('organization_name', '') }}" required>
             </div>
           </div>
@@ -365,7 +366,7 @@
           <div class="row">
             <label class="checkbox">
               <input name="terms_accepted" type="checkbox" required {% if form_data.get('terms_accepted') == 'on' %}checked{% endif %}>
-              I agree to receive webinar updates via email and WhatsApp.
+              I agree to receive webinar updates via email and WhatsApp.<span class="required-mark">*</span>
             </label>
           </div>
 
@@ -411,10 +412,10 @@
         function syncOrganizationLabel() {
           const value = occupation ? occupation.value : "";
           if (value === "Student" || value === "Educator") {
-            orgLabel.textContent = "University / Institute Name";
+            orgLabel.innerHTML = 'University / Institute Name<span class="required-mark">*</span>';
             orgInput.placeholder = "Your university or institute name";
           } else {
-            orgLabel.textContent = "Company / Organization Name";
+            orgLabel.innerHTML = 'Company / Organization Name<span class="required-mark">*</span>';
             orgInput.placeholder = "Your company or organization name";
           }
         }

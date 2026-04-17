@@ -280,7 +280,7 @@ def _already_sent(conn, registration_id: int, channel: str, message_type: str) -
     return bool(row)
 
 
-def send_registration_confirmation(registration_id: int) -> None:
+def send_registration_confirmation(registration_id: int, force: bool = False) -> None:
     with get_webinar_connection() as conn:
         row = conn.execute(
             """
@@ -294,7 +294,7 @@ def send_registration_confirmation(registration_id: int) -> None:
         if not row:
             return
 
-        if not _already_sent(conn, registration_id, "email", "confirmation"):
+        if force or (not _already_sent(conn, registration_id, "email", "confirmation")):
             try:
                 result = send_msg91_email(
                     row["email"],
@@ -304,7 +304,8 @@ def send_registration_confirmation(registration_id: int) -> None:
                         "topic": row["topic"],
                         "date": row["webinar_date"],
                         "time": row["webinar_time"],
-                        "link": row["meeting_link"],
+                        # Email templates use {{meet_link}} for the join button.
+                        "meet_link": row["meeting_link"],
                     },
                 )
                 _insert_delivery(conn, registration_id, "email", "confirmation", "sent", result["provider_message_id"])
@@ -426,6 +427,33 @@ def _message_type_to_delta(message_type: str) -> timedelta:
     raise ValueError(f"Unsupported message type: {message_type}")
 
 
+def _build_whatsapp_reminder_params(template_name: str, row: Dict[str, Any], webinar: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Build MSG91 template variables based on template family.
+
+    Observed template formats:
+    - `24h_event_webinar_reminder` style uses body_1..body_4
+    - `webinar_meetup` style uses var_1..var_3
+    """
+    template_key = (template_name or "").strip().lower()
+    datetime_text = f"{webinar['webinar_date']} {webinar['webinar_time']}"
+    meet_link = webinar["meeting_link"] or ""
+
+    if "webinar_meetup" in template_key:
+        return {
+            "var_1": row["full_name"],
+            "var_2": webinar["topic"],
+            "var_3": meet_link,
+        }
+
+    return {
+        "body_1": row["full_name"],
+        "body_2": webinar["topic"],
+        "body_3": datetime_text,
+        "body_4": meet_link,
+    }
+
+
 def trigger_manual_reminder(
     message_type: str,
     channels: tuple[str, ...] = ("email", "whatsapp"),
@@ -461,6 +489,7 @@ def trigger_manual_reminder(
                                 "topic": webinar["topic"],
                                 "date": webinar["webinar_date"],
                                 "time": webinar["webinar_time"],
+                                "meet_link": webinar["meeting_link"],
                             },
                         )
                     else:
@@ -471,11 +500,7 @@ def trigger_manual_reminder(
                         result = send_msg91_whatsapp(
                             row["phone_e164"],
                             template,
-                            {
-                                "var_1": row["full_name"],
-                                "var_2": webinar["topic"],
-                                "var_3": f"{webinar['webinar_date']} {webinar['webinar_time']}",
-                            },
+                            _build_whatsapp_reminder_params(template, row, webinar),
                         )
                     _insert_delivery(
                         conn,
@@ -535,6 +560,7 @@ def run_scheduled_reminders() -> Dict[str, int]:
                                     "topic": webinar["topic"],
                                     "date": webinar["webinar_date"],
                                     "time": webinar["webinar_time"],
+                                    "meet_link": webinar["meeting_link"],
                                 },
                             )
                         else:
@@ -545,11 +571,7 @@ def run_scheduled_reminders() -> Dict[str, int]:
                             result = send_msg91_whatsapp(
                                 row["phone_e164"],
                                 template,
-                                {
-                                    "var_1": row["full_name"],
-                                    "var_2": webinar["topic"],
-                                    "var_3": f"{webinar['webinar_date']} {webinar['webinar_time']}",
-                                },
+                                _build_whatsapp_reminder_params(template, row, webinar),
                             )
                         _insert_delivery(
                             conn, row["id"], channel, reminder_type, "sent", result["provider_message_id"]
