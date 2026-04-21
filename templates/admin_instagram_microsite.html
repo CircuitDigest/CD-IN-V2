@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instagram Microsite Admin</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -219,6 +220,7 @@
             <a class="tab" href="/admin">Overview</a>
             <a class="tab active" href="/admin/instagram-microsite">Instagram Microsite</a>
             <a class="tab" href="/admin/webinar">Webinar</a>
+            <a class="tab" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
         </nav>
     </header>
 

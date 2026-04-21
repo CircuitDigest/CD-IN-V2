@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Submit your project idea · Admin</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #0f172a; }
+      .page { max-width: 1200px; margin: 1.1rem auto 2rem; padding: 0 1rem; }
+      .tabs { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .tab {
+        text-decoration: none; border-radius: 999px; padding: 0.48rem 0.86rem;
+        border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 0.86rem;
+      }
+      .tab.active { background: #0f172a; border-color: #0f172a; color: #fff; }
+      .card {
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; margin-bottom: 1rem;
+      }
+      .card h2 { margin: 0 0 0.8rem; font-size: 1.05rem; }
+      .row { display: grid; grid-template-columns: 1fr; gap: 0.8rem; margin-bottom: 0.8rem; }
+      @media (min-width: 980px) { .row.two { grid-template-columns: 1fr 1fr; } }
+      label { display: block; font-size: 0.86rem; font-weight: 600; margin-bottom: 0.25rem; color: #334155; }
+      input, select, textarea {
+        width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.6rem 0.72rem;
+      }
+      input:disabled { background: #f1f5f9; color: #475569; }
+      textarea { min-height: 80px; resize: vertical; }
+      button, .btn-inline {
+        border: 0; border-radius: 8px; padding: 0.62rem 0.9rem; font-weight: 600; cursor: pointer; color: #fff; background: #1d4ed8;
+        font-size: 0.9rem; text-decoration: none; display: inline-block;
+      }
+      .btn-danger { background: #dc2626; }
+      .btn-secondary { background: #475569; }
+      .btn-analytics { background: #7c3aed; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+      th, td { padding: 0.52rem 0.35rem; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+      th { font-size: 0.78rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.35px; }
+      .table-wrap { overflow-x: auto; }
+      .flash { padding: 0.7rem 0.8rem; border-radius: 8px; margin-bottom: 0.7rem; font-size: 0.9rem; }
+      .flash.success { background: #ecfdf3; color: #166534; border: 1px solid #bbf7d0; }
+      .flash.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+      .badge {
+        display: inline-block; border-radius: 999px; padding: 0.2rem 0.55rem; font-size: 0.72rem; font-weight: 600;
+      }
+      .badge-open { background: #dcfce7; color: #166534; }
+      .badge-closed { background: #fee2e2; color: #991b1b; }
+      .badge-disabled { background: #e2e8f0; color: #475569; }
+      .badge-unknown { background: #fef9c3; color: #854d0e; }
+      .hint { font-size: 0.78rem; color: #64748b; margin-top: 0.35rem; line-height: 1.45; }
+      .mono { font-family: ui-monospace, monospace; font-size: 0.82rem; word-break: break-all; }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <nav class="tabs" aria-label="Admin sections">
+        <a class="tab" href="{{ url_for('admin_bp.admin') }}">Overview</a>
+        <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
+        <a class="tab" href="{{ url_for('webinar_bp.admin_webinar') }}">Webinar</a>
+        <a class="tab active" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
+      </nav>
+
+      {% if message %}
+        <div class="flash {{ message_type if message_type else 'success' }}">{{ message }}</div>
+      {% endif %}
+
+      <section class="card">
+        <h2>About deadlines</h2>
+        <p style="margin:0;font-size:0.88rem;color:#475569;line-height:1.55;">
+          <strong>IST (Asia/Kolkata)</strong> is used for the calendar day when deciding if a page is still within its
+          <strong>last registration date</strong> (deadline day is inclusive). Public URL pattern:
+          <span class="mono">/submit-your-project-idea/&lt;slug&gt;</span> — use the link in the table to open the live page.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Project idea pages ({{ campaigns|length }})</h2>
+        {% if campaigns %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Board</th>
+                  <th>Slug</th>
+                  <th>Deadline</th>
+                  <th>Status (IST)</th>
+                  <th>Active</th>
+                  <th>Public path</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in campaigns %}
+                  <tr>
+                    <td>{{ c.board_name }}</td>
+                    <td class="mono">{{ c.slug }}</td>
+                    <td>{{ c.registration_deadline }}</td>
+                    <td>
+                      {% if c.registration_status == 'open' %}
+                        <span class="badge badge-open">Open</span>
+                      {% elif c.registration_status == 'closed_deadline' %}
+                        <span class="badge badge-closed">Closed (deadline)</span>
+                      {% elif c.registration_status == 'disabled' %}
+                        <span class="badge badge-disabled">Disabled</span>
+                      {% else %}
+                        <span class="badge badge-unknown">Unknown</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ 'Yes' if c.is_active else 'No' }}</td>
+                    <td>
+                      <a class="mono" href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=c.slug) }}" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8;font-weight:600;">/submit-your-project-idea/{{ c.slug }}</a>
+                    </td>
+                    <td>
+                      <div class="toolbar">
+                        <a class="btn-inline btn-analytics" href="{{ url_for('project_idea_bp.admin_project_idea_analytics', campaign_id=c.id) }}">Analytics</a>
+                        <a class="btn-inline btn-secondary" href="{{ url_for('project_idea_bp.admin_submit_project_idea', edit=c.id) }}">Edit</a>
+                        <form method="post" style="display:inline;" onsubmit="return confirm('Delete this project idea page? This cannot be undone.');">
+                          <input type="hidden" name="action" value="delete">
+                          <input type="hidden" name="campaign_id" value="{{ c.id }}">
+                          <button type="submit" class="btn-danger">Delete</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p style="margin:0;font-size:0.9rem;color:#64748b;">No pages yet. Create one below.</p>
+        {% endif %}
+      </section>
+
+      {% if edit_row %}
+        <section class="card">
+          <h2>Edit page · {{ edit_row.board_name }}</h2>
+          <p class="hint" style="margin-top:0;margin-bottom:0.8rem;">
+            Slug <strong class="mono">{{ edit_row.slug }}</strong> cannot be changed after creation.
+          </p>
+          <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="campaign_id" value="{{ edit_row.id }}">
+            <div class="row two">
+              <div>
+                <label for="e_board_name">Development board name</label>
+                <input id="e_board_name" name="board_name" type="text" value="{{ edit_row.board_name }}" required>
+              </div>
+              <div>
+                <label>URL slug (fixed)</label>
+                <input type="text" value="{{ edit_row.slug }}" disabled>
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="e_tutorial_page_title">Tutorial page title</label>
+                <input id="e_tutorial_page_title" name="tutorial_page_title" type="text" value="{{ edit_row.tutorial_page_title|default('', true) }}" required>
+              </div>
+              <div>
+                <label for="e_tutorial_page_url">Tutorial page link</label>
+                <input id="e_tutorial_page_url" name="tutorial_page_url" type="url" value="{{ edit_row.tutorial_page_url }}" required>
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="e_youtube_video_url">YouTube video link</label>
+                <input id="e_youtube_video_url" name="youtube_video_url" type="url" value="{{ edit_row.youtube_video_url|default('', true) }}" required>
+              </div>
+              <div>
+                <label for="e_youtube_video_title">YouTube video title</label>
+                <input id="e_youtube_video_title" name="youtube_video_title" type="text" value="{{ edit_row.youtube_video_title|default('', true) }}" required>
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="e_tutorial_image">Tutorial page image (replace)</label>
+                <input id="e_tutorial_image" name="tutorial_image" type="file" accept="image/jpeg,image/png,image/webp">
+                <p class="hint">Leave empty to keep the current image. Current: <a href="{{ edit_row.tutorial_image_url }}" target="_blank" rel="noopener">view</a></p>
+              </div>
+              <div>
+                <label for="e_banner_image">Main banner image (replace)</label>
+                <input id="e_banner_image" name="banner_image" type="file" accept="image/jpeg,image/png,image/webp">
+                <p class="hint">
+                  Public hero (~30% viewport height): a <strong>fixed DigiKey-style pattern</strong> fills the strip (may crop with <code>cover</code> on the pattern only).
+                  Your <strong>main banner should be a transparent PNG</strong> where see-through areas show that pattern; the PNG is <strong>never cropped</strong> (<code>contain</code>).<br>
+                  <strong>Recommended art: 1920 × 640&nbsp;px</strong> (3:1) with transparency. Minimum <strong>1440 × 480&nbsp;px</strong>. Prefer <strong>PNG</strong>; aim under <strong>350&nbsp;KB</strong>.
+                </p>
+                <p class="hint">Leave file empty to keep the current image. Current: <a href="{{ edit_row.banner_image_url }}" target="_blank" rel="noopener">view</a></p>
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="e_registration_deadline">Last date for registration</label>
+                <input id="e_registration_deadline" name="registration_deadline" type="date" value="{{ edit_row.registration_deadline }}" required>
+              </div>
+              <div>
+                <label style="display:flex;align-items:center;gap:0.5rem;margin-top:1.5rem;">
+                  <input name="is_active" type="checkbox" {% if edit_row.is_active %}checked{% endif %}>
+                  Page active (can still close before deadline)
+                </label>
+              </div>
+            </div>
+            <div class="toolbar">
+              <button type="submit">Save changes</button>
+              <a class="btn-inline btn-secondary" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Cancel edit</a>
+            </div>
+          </form>
+        </section>
+      {% endif %}
+
+      <section class="card">
+        <h2>Create new project idea page</h2>
+        <form method="post" enctype="multipart/form-data">
+          <input type="hidden" name="action" value="create">
+          <div class="row two">
+            <div>
+              <label for="board_name">Development board name</label>
+              <input id="board_name" name="board_name" type="text" required>
+            </div>
+            <div>
+              <label for="slug">URL slug (optional)</label>
+              <input id="slug" name="slug" type="text" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. raspberry-pi-pico">
+              <p class="hint">Lowercase letters, numbers, hyphens only. Leave blank to auto-generate from the board name (still unique).</p>
+            </div>
+          </div>
+          <div class="row two">
+            <div>
+              <label for="tutorial_page_title">Tutorial page title</label>
+              <input id="tutorial_page_title" name="tutorial_page_title" type="text" required>
+            </div>
+            <div>
+              <label for="tutorial_page_url">Tutorial page link</label>
+              <input id="tutorial_page_url" name="tutorial_page_url" type="url" required>
+            </div>
+          </div>
+          <div class="row two">
+            <div>
+              <label for="youtube_video_url">YouTube video link</label>
+              <input id="youtube_video_url" name="youtube_video_url" type="url" required placeholder="https://www.youtube.com/watch?v=…">
+              <p class="hint">Must be a youtube.com or youtu.be URL.</p>
+            </div>
+            <div>
+              <label for="youtube_video_title">YouTube video title</label>
+              <input id="youtube_video_title" name="youtube_video_title" type="text" required>
+            </div>
+          </div>
+          <div class="row two">
+            <div>
+              <label for="tutorial_image">Tutorial page image</label>
+              <input id="tutorial_image" name="tutorial_image" type="file" accept="image/jpeg,image/png,image/webp" required>
+            </div>
+            <div>
+              <label for="banner_image">Main banner image</label>
+              <input id="banner_image" name="banner_image" type="file" accept="image/jpeg,image/png,image/webp" required>
+              <p class="hint">
+                Public hero (~30% viewport height): a <strong>fixed DigiKey-style pattern</strong> fills the strip (may crop with <code>cover</code> on the pattern only).
+                Your <strong>main banner should be a transparent PNG</strong> where see-through areas show that pattern; the PNG is <strong>never cropped</strong> (<code>contain</code>).<br>
+                <strong>Recommended art: 1920 × 640&nbsp;px</strong> (3:1) with transparency. Minimum <strong>1440 × 480&nbsp;px</strong>. Prefer <strong>PNG</strong>; aim under <strong>350&nbsp;KB</strong>.
+              </p>
+            </div>
+          </div>
+          <div class="row two">
+            <div>
+              <label for="registration_deadline">Last date for registration</label>
+              <input id="registration_deadline" name="registration_deadline" type="date" required>
+            </div>
+            <div>
+              <label style="display:flex;align-items:center;gap:0.5rem;margin-top:1.5rem;">
+                <input name="is_active" type="checkbox" checked>
+                Page active
+              </label>
+            </div>
+          </div>
+          <button type="submit">Create page</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

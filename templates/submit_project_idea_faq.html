@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FAQ · {{ campaign.board_name }} · CircuitDigest</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      @font-face {
+        font-family: "DigiKey Artex";
+        src: url("{{ url_for('static', filename='submit-project-idea/fonts/DigiKey-Artex-Regular.ttf') }}") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      :root {
+        --bg: #ffffff;
+        --bg-muted: #f7f8fb;
+        --dk-red: #ff2100;
+        --dk-blurple: #080623;
+        --text-primary: #000000;
+        --text-secondary: rgba(8, 6, 35, 0.72);
+        --border-subtle: rgba(8, 6, 35, 0.16);
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        line-height: 1.5;
+        overflow-x: clip;
+      }
+      .page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 0 14px 30px;
+      }
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 16px 0 14px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .site-header__logo { display: inline-flex; line-height: 0; flex-shrink: 0; }
+      .site-header__logo img { height: 34px; width: auto; object-fit: contain; }
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        border: 1px solid var(--border-subtle);
+        border-top: 0;
+        padding: 0.46rem;
+        margin-bottom: 0.95rem;
+        background: #fff;
+      }
+      .menu a {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--dk-blurple);
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        padding: 0.4rem 0.72rem;
+        line-height: 1;
+      }
+      .menu a:hover {
+        border-color: var(--dk-red);
+        color: var(--dk-red);
+      }
+      .menu a.active {
+        color: #fff;
+        border-color: var(--dk-red);
+        background: var(--dk-red);
+      }
+      .hero {
+        text-align: center;
+        padding: 1.2rem 0.95rem 0.9rem;
+        margin-top: 0.9rem;
+        border: 1px solid var(--border-subtle);
+        background: #f9efe4;
+      }
+      .hero__title {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 1.46rem;
+        font-weight: 400;
+        line-height: 1.17;
+        color: var(--dk-red);
+      }
+      .hero__subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.58;
+        max-width: 72ch;
+        margin: 0.62rem auto 0;
+        text-align: center;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--border-subtle);
+        padding: 1.2rem 1.05rem;
+        margin-top: 1rem;
+      }
+      .faq-item {
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .faq-item:last-child { border-bottom: 0; padding-bottom: 0; }
+      .faq-q {
+        color: #080623;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+      }
+      .faq-a {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+      .faq-a a {
+        color: #480bbe;
+        font-weight: 600;
+        text-decoration: underline;
+      }
+      .community-card {
+        border: 1px solid var(--border-subtle);
+        background: #fff;
+        padding: 1rem 1.05rem;
+        margin-top: 1rem;
+        margin-bottom: 0.4rem;
+      }
+      .community-card__title {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--dk-red);
+        font-size: 1.02rem;
+        margin: 0 0 0.35rem;
+      }
+      .community-card__line {
+        color: var(--text-secondary);
+        font-size: 0.86rem;
+        margin: 0 0 0.55rem;
+      }
+      .community-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .community-link {
+        border: 1px solid var(--border-subtle);
+        background: #fff;
+        padding: 0.34rem 0.58rem;
+        border-radius: 999px;
+        color: var(--dk-blurple);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.34rem;
+        line-height: 1;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .community-link svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        display: block;
+      }
+      .community-link:hover {
+        border-color: var(--dk-red);
+        background: #fff7f6;
+        color: var(--dk-red);
+      }
+      @media (max-width: 479px) {
+        .menu { gap: 0.35rem; }
+        .menu a { font-size: 0.78rem; padding: 0.36rem 0.58rem; }
+        .hero { padding: 1rem 0.7rem 0.78rem; }
+        .hero__title { font-size: 1.2rem; }
+        .hero__subtitle { font-size: 0.84rem; }
+      }
+      @media (min-width: 760px) {
+        .page { max-width: 960px; padding-left: 24px; padding-right: 24px; }
+        .hero__title { font-size: 1.7rem; }
+        .site-header__logo img { height: 38px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="site-header">
+        <a class="site-header__logo" href="https://circuitdigest.com" target="_blank" rel="noopener noreferrer" aria-label="CircuitDigest home">
+          <img src="https://circuitdigest.com/sites/default/files/inline-images/logo_circuitdigest.png" alt="CircuitDigest">
+        </a>
+      </header>
+      <nav class="menu" aria-label="Project idea sections">
+        <a href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}#register-section">Register</a>
+        <a href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}#submit-idea-section">Submit Idea</a>
+        <a href="{{ url_for('project_idea_bp.submit_project_idea_resources', slug=campaign.slug) }}">Resources</a>
+        <a class="active" href="{{ url_for('project_idea_bp.submit_project_idea_faq', slug=campaign.slug) }}">FAQ</a>
+      </nav>
+
+      <section class="hero">
+        <h1 class="hero__title">FAQ</h1>
+        <p class="hero__subtitle">Find quick answers about registration, submission, and how to win the {{ campaign.board_name }}.</p>
+      </section>
+
+      <section class="card">
+        <article class="faq-item">
+          <p class="faq-q">1. Who can submit a project idea?</p>
+          <p class="faq-a">Any individual in India can register and submit a project idea within the active submission timeline (Last date: {{ campaign.registration_deadline }}).</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">2. How many project ideas will be selected?</p>
+          <p class="faq-a">A minimum of 5 project ideas will be selected. CircuitDigest may increase the selection count based on the total number and quality of submissions received.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">3. How can I update my project idea or social profiles?</p>
+          <p class="faq-a">If you have already registered and want to update your project idea or social profiles, you can submit the form again using the same email and phone number with your latest details. Your previous submission will be updated with the new information.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">4. How will the project ideas be selected?</p>
+          <p class="faq-a">All ideas submitted within the timeline are considered. Selection is based on the quality and clarity of your project concept, along with the strength of your profile. Adding relevant social profiles and sharing previous experience or projects you have worked on can improve your chances.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">5. How will I know if I am selected?</p>
+          <p class="faq-a">After the registration deadline, the CircuitDigest team will review all valid submissions. If your idea is selected, we will contact you through the email address and phone number provided in your registration form.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">6. How much time do I have to build my project?</p>
+          <p class="faq-a">We recommend submitting your work on the <a href="https://forum.digikey.com/" target="_blank" rel="noopener noreferrer">DigiKey TechForum</a> within 4-6 days of receiving your development board. You can submit even if your project is still a work in progress, and continue updating the same thread as you make progress, even after receiving the rebate.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">7. How will I get my free development board?</p>
+          <p class="faq-a">Once your idea is selected and confirmed by our team, you can purchase the board or module directly from DigiKey.in. After you receive it and submit your work on the <a href="https://forum.digikey.com/" target="_blank" rel="noopener noreferrer">DigiKey TechForum</a>, your rebate will be processed.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">8. How much rebate will I get for my submission?</p>
+          <p class="faq-a">The rebate amount for each selected project idea is fixed at Rs. 5600. This is intended to cover the board or module cost from DigiKey.in, including shipping and applicable customs duty.</p>
+        </article>
+        <article class="faq-item">
+          <p class="faq-q">9. Is this rebate amount fixed, and how will I receive it?</p>
+          <p class="faq-a">Yes, the refund or rebate amount is fixed at Rs. 5600, irrespective of the cost of your board or module. The refund will be made directly to your UPI ID or bank account.</p>
+        </article>
+      </section>
+
+      <section class="community-card" aria-label="Community links">
+        <h2 class="community-card__title">Have Any Questions?</h2>
+        <p class="community-card__line">Start a discussion on:</p>
+        <span class="community-links">
+          <a class="community-link" href="https://discord.com/invite/UXJrFJSWpz" target="_blank" rel="noopener noreferrer" aria-label="Forum">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm2 4v2h12V9H6Zm0 4v2h8v-2H6Z"/></svg>
+            Forum
+          </a>
+          <a class="community-link" href="https://chat.whatsapp.com/KY7it69fSAG7WvZPv6JJdA?mode=gi_t" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.11 4.93c-4.3-4.3-11.27-4.3-15.57 0-3.54 3.54-4.17 8.95-1.9 13.17L0 24l5.98-1.57a11 11 0 0 0 5.23 1.33h.01c6.08 0 11.02-4.94 11.03-11.02.01-2.95-1.14-5.73-3.13-7.81zM11.22 21.5h-.01c-1.67 0-3.31-.45-4.74-1.29l-.34-.2-3.55.93.95-3.46-.22-.35a8.7 8.7 0 0 1 1.35-10.79 8.77 8.77 0 0 1 12.41 0 8.68 8.68 0 0 1 2.55 6.19c0 4.84-3.94 8.77-8.4 8.77zm4.81-6.56c-.26-.13-1.55-.76-1.79-.85-.24-.09-.41-.13-.58.13-.17.26-.67.85-.82 1.03-.15.17-.3.2-.56.07-.26-.13-1.09-.4-2.08-1.27-.77-.68-1.29-1.52-1.44-1.78-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.58-1.41-.79-1.94-.21-.5-.42-.43-.58-.44l-.5-.01c-.17 0-.45.06-.69.32-.24.26-.91.89-.91 2.17s.93 2.52 1.06 2.69c.13.17 1.82 2.78 4.42 3.9.62.27 1.11.43 1.49.55.63.2 1.2.17 1.65.1.5-.07 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.07-.11-.24-.17-.5-.3z"/></svg>
+            WhatsApp
+          </a>
+          <a class="community-link" href="https://t.me/circuitdigest" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 4.3 3.6 11.1c-1.2.5-1.2 1.2-.2 1.5l4.5 1.4 1.8 5.8c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.2-2.1 4.5 3.3c.8.4 1.4.2 1.6-.8l3-14.1c.3-1.2-.4-1.7-1.5-1.3ZM9 13.7l9.8-6.2c.5-.3 1-.1.6.3l-8.1 7.3-.3 3.2-2-4.6Z"/></svg>
+            Telegram
+          </a>
+          <a class="community-link" href="https://discord.com/invite/UXJrFJSWpz" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 5.3A16 16 0 0 0 16.3 4l-.2.5a11 11 0 0 1 2.7 1.3 10.5 10.5 0 0 0-3.3-1 14.1 14.1 0 0 0-7 0 10.5 10.5 0 0 0-3.3 1A11 11 0 0 1 7.9 4l-.2-.5a16 16 0 0 0-4 1.3C1.2 9.2.6 13.6.9 18a16.5 16.5 0 0 0 4.9 2.5l1.1-1.8a10.4 10.4 0 0 1-1.7-.8l.4-.3c3.2 1.5 6.7 1.5 9.8 0l.4.3c-.5.3-1.1.6-1.7.8l1.1 1.8A16.5 16.5 0 0 0 23.1 18c.4-5.1-.8-9.5-2.8-12.7ZM9.5 15.3c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm5 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+            Discord
+          </a>
+        </span>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Analytics · {{ campaign.board_name }}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #0f172a; }
+      .page { max-width: 1220px; margin: 1.1rem auto 2rem; padding: 0 1rem; }
+      .tabs { display: flex; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .tab {
+        text-decoration: none; border-radius: 999px; padding: 0.48rem 0.86rem;
+        border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 0.86rem;
+      }
+      .tab.active { background: #0f172a; border-color: #0f172a; color: #fff; }
+      .card {
+        background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem;
+      }
+      h1 { font-size: 1.15rem; margin: 0 0 0.5rem; }
+      h2 { margin: 0 0 0.8rem; font-size: 1.05rem; }
+      p { margin: 0; color: #475569; font-size: 0.92rem; line-height: 1.55; }
+      a.back {
+        display: inline-block; margin-top: 1rem; color: #1d4ed8; font-weight: 600; text-decoration: none;
+      }
+      a.btn-csv {
+        display: inline-block;
+        margin-top: 0.75rem;
+        margin-right: 0.75rem;
+        background: #166534;
+        color: #fff;
+        padding: 0.55rem 0.95rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 0.88rem;
+      }
+      .stat-grid { display: grid; grid-template-columns: 1fr; gap: 0.7rem; }
+      .stat-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.7rem 0.8rem; }
+      .stat-label { font-size: 0.8rem; color: #64748b; margin-bottom: 0.18rem; }
+      .stat-value { font-size: 1.3rem; font-weight: 700; color: #0f172a; }
+      @media (min-width: 760px) { .stat-grid { grid-template-columns: 1fr 1fr 1fr; } }
+      .analytics-grid { display: grid; gap: 1rem; margin-top: 0.75rem; }
+      @media (min-width: 920px) { .analytics-grid.three { grid-template-columns: 1fr 1fr 1fr; } }
+      .analytics-block h3 {
+        margin: 0 0 0.45rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: minmax(5.5rem, 8.5rem) 1fr auto;
+        align-items: center;
+        gap: 0.35rem 0.45rem;
+        font-size: 0.78rem;
+        margin-bottom: 0.32rem;
+      }
+      .bar-label { color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .bar-track { height: 0.5rem; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+      .bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); border-radius: 99px; min-width: 2px; }
+      .bar-count { color: #64748b; font-variant-numeric: tabular-nums; font-size: 0.76rem; }
+      .social-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.45rem 0.75rem;
+        font-size: 0.82rem;
+        margin-top: 0.35rem;
+      }
+      @media (min-width: 520px) { .social-summary { grid-template-columns: 1fr 1fr 1fr; } }
+      .social-pill {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 0.4rem 0.5rem;
+        background: #f8fafc;
+      }
+      .social-pill strong { display: block; color: #0f172a; font-size: 1rem; }
+      .social-pill span { color: #64748b; font-size: 0.72rem; }
+      .sort-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+      .sort-toolbar label { margin: 0; font-size: 0.82rem; color:#334155; font-weight: 600; }
+      .sort-toolbar select { width: auto; min-width: 14rem; max-width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.45rem 0.55rem; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+      th, td { padding: 0.52rem 0.35rem; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: top; }
+      th { font-size: 0.76rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.35px; }
+      .muted-cell { color:#64748b; }
+      .social-lines div { margin-bottom: 0.15rem; }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <nav class="tabs" aria-label="Admin sections">
+        <a class="tab" href="{{ url_for('admin_bp.admin') }}">Overview</a>
+        <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
+        <a class="tab" href="{{ url_for('webinar_bp.admin_webinar') }}">Webinar</a>
+        <a class="tab active" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
+      </nav>
+      <p style="margin:0 0 1rem;">
+        <a href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}" style="color:#1d4ed8;font-weight:600;text-decoration:none;">← All project idea pages</a>
+      </p>
+      <section class="card">
+        <h1>Analytics · {{ campaign.board_name }}</h1>
+        <p style="margin-top:0.75rem;">
+          Slug <code>{{ campaign.slug }}</code> — <strong>{{ lead_count }}</strong> lead(s) captured (DigiKey export below).
+        </p>
+        <p style="margin-top:0.65rem;font-size:0.84rem;color:#64748b;">
+          Download leads as <strong>CSV UTF-8</strong> (Excel-friendly BOM) for DigiKey reporting.
+        </p>
+        <a class="btn-csv" href="{{ url_for('project_idea_bp.admin_project_idea_export_csv', campaign_id=campaign.id) }}">Download leads CSV</a>
+        <a class="back" href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}" target="_blank" rel="noopener noreferrer">Open public page</a>
+      </section>
+
+      <section class="card">
+        <h2>Submission Snapshot</h2>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-label">Total Registrations</div><div class="stat-value">{{ lead_stats.total }}</div></div>
+          <div class="stat-card"><div class="stat-label">Shared Any Social Profile</div><div class="stat-value">{{ lead_stats.with_social }}</div></div>
+          <div class="stat-card"><div class="stat-label">No Social Profile</div><div class="stat-value">{{ lead_stats.without_social }}</div></div>
+        </div>
+        {% if lead_stats.total %}
+          <div class="analytics-grid three">
+            <div class="analytics-block">
+              <h3>Title</h3>
+              {% for row in title_breakdown %}
+                <div class="bar-row">
+                  <span class="bar-label" title="{{ row.label }}">{{ row.label }}</span>
+                  <div class="bar-track"><div class="bar-fill" style="width: {{ row.pct }}%;"></div></div>
+                  <span class="bar-count">{{ row.count }} ({{ row.pct }}%)</span>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="analytics-block">
+              <h3>Industry</h3>
+              {% for row in industry_breakdown %}
+                <div class="bar-row">
+                  <span class="bar-label" title="{{ row.label }}">{{ row.label }}</span>
+                  <div class="bar-track"><div class="bar-fill" style="width: {{ row.pct }}%;"></div></div>
+                  <span class="bar-count">{{ row.count }} ({{ row.pct }}%)</span>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="analytics-block">
+              <h3>Country</h3>
+              {% for row in country_breakdown %}
+                <div class="bar-row">
+                  <span class="bar-label" title="{{ row.label }}">{{ row.label }}</span>
+                  <div class="bar-track"><div class="bar-fill" style="width: {{ row.pct }}%;"></div></div>
+                  <span class="bar-count">{{ row.count }} ({{ row.pct }}%)</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="analytics-block" style="margin-top:1rem;">
+            <h3>Social Profiles</h3>
+            <p style="margin:0 0 0.35rem;font-size:0.82rem;color:#64748b;">
+              {{ lead_social.any_channel }} of {{ lead_stats.total }} people shared at least one profile link.
+            </p>
+            <div class="social-summary">
+              <div class="social-pill"><strong>{{ lead_social.linkedin }}</strong><span>LinkedIn</span></div>
+              <div class="social-pill"><strong>{{ lead_social.instagram }}</strong><span>Instagram</span></div>
+              <div class="social-pill"><strong>{{ lead_social.x }}</strong><span>X</span></div>
+              <div class="social-pill"><strong>{{ lead_social.youtube }}</strong><span>YouTube</span></div>
+            </div>
+          </div>
+        {% else %}
+          <p style="margin-top:1rem;font-size:0.86rem;color:#64748b;">No submissions yet for this campaign. Analytics will appear once participants register.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2>Participant Details</h2>
+        <form method="get" class="sort-toolbar" action="{{ url_for('project_idea_bp.admin_project_idea_analytics', campaign_id=campaign.id) }}">
+          <label for="sort">Sort by</label>
+          <select id="sort" name="sort" onchange="this.form.submit()">
+            <option value="submitted_desc" {% if lead_sort == 'submitted_desc' %}selected{% endif %}>Submitted (newest first)</option>
+            <option value="submitted_asc" {% if lead_sort == 'submitted_asc' %}selected{% endif %}>Submitted (oldest first)</option>
+            <option value="name_asc" {% if lead_sort == 'name_asc' %}selected{% endif %}>Name (A–Z)</option>
+            <option value="email_asc" {% if lead_sort == 'email_asc' %}selected{% endif %}>Email (A–Z)</option>
+            <option value="title_asc" {% if lead_sort == 'title_asc' %}selected{% endif %}>Title (A–Z)</option>
+            <option value="industry_asc" {% if lead_sort == 'industry_asc' %}selected{% endif %}>Industry (A–Z)</option>
+            <option value="country_asc" {% if lead_sort == 'country_asc' %}selected{% endif %}>Country (A–Z)</option>
+          </select>
+        </form>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Submitted At</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Title</th>
+                <th>Industry</th>
+                <th>Country</th>
+                <th>Company</th>
+                <th>Project Title</th>
+                <th>Project Idea</th>
+                <th>Social Profiles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in leads %}
+                <tr>
+                  <td>{{ r.collection_date_iso }}</td>
+                  <td>{{ r.first_name }} {{ r.last_name }}</td>
+                  <td>{{ r.email }}</td>
+                  <td>{{ r.phone or '—' }}</td>
+                  <td>{{ r.title }}</td>
+                  <td>{{ r.industry }}</td>
+                  <td>{{ r.country }}</td>
+                  <td>{{ r.company }}</td>
+                  <td>{{ r.project_title or '—' }}</td>
+                  <td>{{ r.project_idea or '—' }}</td>
+                  <td class="social-lines">
+                    {% if r.social_linkedin %}<div>LinkedIn: {{ r.social_linkedin }}</div>{% endif %}
+                    {% if r.social_instagram %}<div>Instagram: {{ r.social_instagram }}</div>{% endif %}
+                    {% if r.social_x %}<div>X: {{ r.social_x }}</div>{% endif %}
+                    {% if r.social_youtube %}<div>YouTube: {{ r.social_youtube }}</div>{% endif %}
+                    {% if not r.social_linkedin and not r.social_instagram and not r.social_x and not r.social_youtube %}
+                      <span class="muted-cell">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="11" class="muted-cell">No submissions yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

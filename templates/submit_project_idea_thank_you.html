@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thank you · {{ campaign.board_name }} · CircuitDigest</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --site-navy: #0d3d79;
+        --brand: #0085d5;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #fff;
+        color: var(--text-primary);
+        line-height: 1.5;
+      }
+      .page { max-width: 640px; margin: 0 auto; padding: 0 14px 28px; }
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 0 12px;
+        border-bottom: 1px solid #e5edf5;
+      }
+      .site-header__logo { display: inline-flex; line-height: 0; flex-shrink: 0; }
+      .site-header__logo img { height: 34px; width: auto; object-fit: contain; }
+      .site-header__tagline {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--site-navy);
+        text-align: right;
+        line-height: 1.35;
+      }
+      .thank-block {
+        text-align: center;
+        padding: 1.25rem 0.5rem 1rem;
+      }
+      .thank-block h1 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--site-navy);
+        margin-bottom: 0.5rem;
+      }
+      .thank-block p { color: var(--text-secondary); font-size: 0.92rem; max-width: 42ch; margin: 0 auto; }
+      .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      .card h2 { font-size: 0.98rem; font-weight: 700; color: var(--site-navy); margin-bottom: 0.65rem; }
+      .tutorial-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+      .tutorial-row img { width: 140px; height: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
+      a.cta { color: #1d4ed8; font-weight: 600; word-break: break-all; }
+      .video-wrap {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #0f172a;
+        margin-top: 0.5rem;
+      }
+      .video-wrap iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+      .back-link { display: inline-block; margin-top: 1rem; color: #1d4ed8; font-weight: 600; text-decoration: none; font-size: 0.9rem; }
+      .community-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+        margin: 0.5rem 0 1rem;
+      }
+      .community-card__title {
+        color: var(--site-navy);
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0 0 0.35rem;
+      }
+      .community-card__line {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0 0 0.55rem;
+      }
+      .community-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .community-link {
+        border: 1px solid #d4dbe7;
+        background: #fff;
+        padding: 0.34rem 0.58rem;
+        border-radius: 999px;
+        color: var(--site-navy);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.34rem;
+        line-height: 1;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .community-link svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        display: block;
+      }
+      .community-link:hover {
+        border-color: #1d4ed8;
+        background: #f4f8ff;
+        color: #1d4ed8;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      @media (max-width: 479px) {
+        .site-header { flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+        .site-header__tagline { text-align: center; }
+      }
+      @media (min-width: 760px) {
+        .page { max-width: 740px; padding-left: 16px; padding-right: 16px; }
+        .site-header__logo img { height: 38px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="site-header">
+        <a class="site-header__logo" href="https://circuitdigest.com" target="_blank" rel="noopener noreferrer" aria-label="CircuitDigest home">
+          <img src="https://circuitdigest.com/sites/default/files/inline-images/logo_circuitdigest.png" alt="CircuitDigest">
+        </a>
+        <p class="site-header__tagline">India's Leading Electronics<br>Engineering Community</p>
+      </header>
+
+      <div class="thank-block">
+        <h1>Thank you!</h1>
+        <p>Your registration was received. Below are more resources for your build.</p>
+      </div>
+
+      <section class="card">
+        <h2>Tutorial</h2>
+        <div class="tutorial-row">
+          {% if campaign.tutorial_image_url %}
+            <img src="{{ campaign.tutorial_image_url }}" alt="">
+          {% endif %}
+          <div>
+            <p style="font-weight:600;margin-bottom:0.35rem;">{{ campaign.tutorial_page_title }}</p>
+            <a class="cta" href="{{ campaign.tutorial_page_url }}" target="_blank" rel="noopener noreferrer">Open tutorial page</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>{{ campaign.youtube_video_title }}</h2>
+        {% if campaign.youtube_embed_url %}
+          <div class="video-wrap">
+            <iframe
+              src="{{ campaign.youtube_embed_url }}"
+              title="{{ campaign.youtube_video_title }}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        {% else %}
+          <p style="margin:0;font-size:0.9rem;color:#64748b;">Watch on <a class="cta" href="{{ campaign.youtube_video_url }}" target="_blank" rel="noopener noreferrer">YouTube</a></p>
+        {% endif %}
+      </section>
+
+      <section class="community-card" aria-label="Community links">
+        <h2 class="community-card__title">Have Any Questions?</h2>
+        <p class="community-card__line">Start a discussion on:</p>
+        <span class="community-links">
+          <a class="community-link" href="https://discord.com/invite/UXJrFJSWpz" target="_blank" rel="noopener noreferrer" aria-label="Forum">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm2 4v2h12V9H6Zm0 4v2h8v-2H6Z"/></svg>
+            Forum
+          </a>
+          <a class="community-link" href="https://chat.whatsapp.com/KY7it69fSAG7WvZPv6JJdA?mode=gi_t" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.11 4.93c-4.3-4.3-11.27-4.3-15.57 0-3.54 3.54-4.17 8.95-1.9 13.17L0 24l5.98-1.57a11 11 0 0 0 5.23 1.33h.01c6.08 0 11.02-4.94 11.03-11.02.01-2.95-1.14-5.73-3.13-7.81zM11.22 21.5h-.01c-1.67 0-3.31-.45-4.74-1.29l-.34-.2-3.55.93.95-3.46-.22-.35a8.7 8.7 0 0 1 1.35-10.79 8.77 8.77 0 0 1 12.41 0 8.68 8.68 0 0 1 2.55 6.19c0 4.84-3.94 8.77-8.4 8.77zm4.81-6.56c-.26-.13-1.55-.76-1.79-.85-.24-.09-.41-.13-.58.13-.17.26-.67.85-.82 1.03-.15.17-.3.2-.56.07-.26-.13-1.09-.4-2.08-1.27-.77-.68-1.29-1.52-1.44-1.78-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.58-1.41-.79-1.94-.21-.5-.42-.43-.58-.44l-.5-.01c-.17 0-.45.06-.69.32-.24.26-.91.89-.91 2.17s.93 2.52 1.06 2.69c.13.17 1.82 2.78 4.42 3.9.62.27 1.11.43 1.49.55.63.2 1.2.17 1.65.1.5-.07 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.07-.11-.24-.17-.5-.3z"/></svg>
+            WhatsApp
+          </a>
+          <a class="community-link" href="https://t.me/circuitdigest" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 4.3 3.6 11.1c-1.2.5-1.2 1.2-.2 1.5l4.5 1.4 1.8 5.8c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.2-2.1 4.5 3.3c.8.4 1.4.2 1.6-.8l3-14.1c.3-1.2-.4-1.7-1.5-1.3ZM9 13.7l9.8-6.2c.5-.3 1-.1.6.3l-8.1 7.3-.3 3.2-2-4.6Z"/></svg>
+            Telegram
+          </a>
+          <a class="community-link" href="https://discord.com/invite/UXJrFJSWpz" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 5.3A16 16 0 0 0 16.3 4l-.2.5a11 11 0 0 1 2.7 1.3 10.5 10.5 0 0 0-3.3-1 14.1 14.1 0 0 0-7 0 10.5 10.5 0 0 0-3.3 1A11 11 0 0 1 7.9 4l-.2-.5a16 16 0 0 0-4 1.3C1.2 9.2.6 13.6.9 18a16.5 16.5 0 0 0 4.9 2.5l1.1-1.8a10.4 10.4 0 0 1-1.7-.8l.4-.3c3.2 1.5 6.7 1.5 9.8 0l.4.3c-.5.3-1.1.6-1.7.8l1.1 1.8A16.5 16.5 0 0 0 23.1 18c.4-5.1-.8-9.5-2.8-12.7ZM9.5 15.3c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm5 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+            Discord
+          </a>
+        </span>
+      </section>
+
+      <p style="text-align:center;">
+        <a class="back-link" href="https://circuitdigest.com">Back to CircuitDigest</a>
+      </p>
+    </main>
+  </body>
+</html>

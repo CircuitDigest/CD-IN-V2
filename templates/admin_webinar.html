@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Webinar</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
     <style>
       body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #0f172a; }
       .page { max-width: 1200px; margin: 1.1rem auto 2rem; padding: 0 1rem; }
@@ -92,6 +93,7 @@
         <a class="tab" href="{{ url_for('admin_bp.admin') }}">Overview</a>
         <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
         <a class="tab active" href="{{ url_for('webinar_bp.admin_webinar') }}">Webinar</a>
+        <a class="tab" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
       </nav>
 
       {% if message %}

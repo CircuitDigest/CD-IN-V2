@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -101,6 +102,7 @@
         <a class="tab active" href="{{ url_for('admin_bp.admin') }}">Overview</a>
         <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
         <a class="tab" href="{{ url_for('webinar_bp.admin_webinar') }}">Webinar</a>
+        <a class="tab" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
       </nav>
 
       <section class="card">
@@ -108,6 +110,7 @@
         <div class="actions">
           <a class="button-link" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Open Instagram Microsite Tab</a>
           <a class="button-link" href="{{ url_for('webinar_bp.admin_webinar') }}">Open Webinar Tab</a>
+          <a class="button-link" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
         </div>
       </section>
     </main>

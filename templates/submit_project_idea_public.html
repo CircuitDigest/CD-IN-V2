@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Submit Project Idea · {{ campaign.board_name }} · CircuitDigest</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      @font-face {
+        font-family: "DigiKey Artex";
+        src: url("{{ url_for('static', filename='submit-project-idea/fonts/DigiKey-Artex-Regular.ttf') }}") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "DigiKey Artex";
+        src: url("{{ url_for('static', filename='submit-project-idea/fonts/DigiKey-Artex-Bold.ttf') }}") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      :root {
+        --bg: #ffffff;
+        --bg-muted: #f7f8fb;
+        --dk-red-dark: #6a0a06;
+        --dk-blurple: #080623;
+        --dk-red: #ff2100;
+        --dk-light-board: #e7ccab;
+        --text-primary: #000000;
+        --text-secondary: rgba(8, 6, 35, 0.72);
+        --border-subtle: rgba(8, 6, 35, 0.16);
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        line-height: 1.5;
+        overflow-x: clip;
+      }
+      html { scroll-behavior: smooth; }
+      .dk-headline {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+      }
+      .dk-cta {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-weight: 700;
+      }
+      .page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 0 14px 30px;
+      }
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 16px 0 14px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .site-header__logo { display: inline-flex; line-height: 0; flex-shrink: 0; }
+      .site-header__logo img {
+        height: 34px;
+        width: auto;
+        object-fit: contain;
+      }
+      .menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        border: 1px solid var(--border-subtle);
+        border-top: 0;
+        padding: 0.46rem;
+        margin-bottom: 0.95rem;
+        background: #fff;
+      }
+      .menu__link {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--dk-blurple);
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        padding: 0.4rem 0.72rem;
+        line-height: 1;
+      }
+      .menu__link:hover {
+        border-color: var(--dk-red);
+        color: var(--dk-red);
+      }
+      .hero {
+        text-align: center;
+        padding: 1.2rem 0.95rem 0.9rem;
+        margin-top: 0.9rem;
+        border: 1px solid var(--border-subtle);
+        background: #f9efe4;
+        position: relative;
+      }
+      .hero-banner {
+        margin-top: 1rem;
+        overflow: hidden;
+        border: 0;
+        background: transparent;
+      }
+      .hero-banner img {
+        display: block;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+      }
+      .hero__title {
+        font-size: 1.46rem;
+        font-weight: 400;
+        line-height: 1.17;
+        color: var(--dk-red);
+        margin: 0 auto;
+        letter-spacing: 0;
+      }
+      .hero__subtitle {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.58;
+        max-width: 72ch;
+        margin: 0.62rem auto 0;
+        text-align: center;
+      }
+      .deadline-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.42rem;
+        font-size: 0.84rem;
+        color: var(--text-primary);
+        border: 1px solid var(--border-subtle);
+        border-top: 0;
+        background: #fff;
+        padding: 0.62rem 0.75rem;
+        margin: 0 0 1rem;
+      }
+      .deadline-line__label {
+        color: var(--text-secondary);
+        letter-spacing: 0.01em;
+        font-size: 0.78rem;
+        font-weight: 500;
+      }
+      .deadline-line__date {
+        font-family: "Roboto Mono", ui-monospace, monospace;
+        font-weight: 700;
+        color: var(--dk-blurple);
+      }
+      .deadline-line__countdown {
+        font-family: "Roboto Mono", ui-monospace, monospace;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #ff2100;
+        border: 1px solid #ff2100;
+        background: #ffffff;
+        padding: 0.12rem 0.42rem;
+        letter-spacing: 0.01em;
+      }
+      .notice {
+        border: 1px solid var(--border-subtle);
+        background: #fff7f6;
+        color: var(--dk-blurple);
+        padding: 0.9rem 1rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--border-subtle);
+        padding: 1.3rem 1.15rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 22px rgba(8, 6, 35, 0.05);
+      }
+      .card h2 {
+        font-size: 1.14rem;
+        font-weight: 400;
+        color: var(--dk-red);
+        margin: 0 0 0.48rem;
+        line-height: 1.25;
+      }
+      .section-subtitle {
+        font-size: 0.85rem;
+        font-weight: 700;
+        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--dk-blurple);
+        letter-spacing: 0.01em;
+        margin: 0 0 0.65rem;
+        padding-top: 0.1rem;
+      }
+      .optional-note {
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: none;
+        letter-spacing: normal;
+      }
+      .form-block {
+        padding-bottom: 1.1rem;
+        margin-bottom: 1.1rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .form-block:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .form-block--flush {
+        padding-bottom: 0;
+        margin-bottom: 0;
+        border-bottom: 0;
+        padding-top: 0.5rem;
+      }
+      .row { display: grid; grid-template-columns: 1fr; gap: 0.78rem; margin-bottom: 0.78rem; }
+      .row:last-child { margin-bottom: 0; }
+      .row--company { max-width: 420px; }
+      label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        margin-bottom: 0.38rem;
+        color: var(--dk-blurple);
+        letter-spacing: 0.01em;
+      }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid var(--border-subtle);
+        border-radius: 0;
+        padding: 0.7rem 0.76rem;
+        box-sizing: border-box;
+        font-size: 16px;
+        color: var(--text-primary);
+        background: var(--bg);
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: rgba(8, 6, 35, 0.45);
+      }
+      #project_title::placeholder,
+      #project_idea::placeholder {
+        font-size: 0.75rem;
+      }
+      input:focus, select:focus, textarea:focus {
+        border-color: rgba(8, 6, 35, 0.45);
+        outline: 2px solid rgba(8, 6, 35, 0.22);
+        outline-offset: 0;
+      }
+      textarea { min-height: 140px; resize: vertical; line-height: 1.45; }
+      .checkbox {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        margin-top: 0.9rem;
+        padding-top: 0.9rem;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .checkbox input {
+        width: auto;
+        margin-top: 0.18rem;
+        flex-shrink: 0;
+        inline-size: 16px;
+        block-size: 16px;
+        accent-color: var(--dk-red);
+      }
+      .checkbox span {
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: var(--dk-blurple);
+        line-height: 1.5;
+      }
+      .checkbox .required-mark {
+        color: var(--dk-red);
+      }
+      .consent-legal {
+        font-size: 0.82rem;
+        line-height: 1.55;
+        color: var(--text-primary);
+        margin-bottom: 0.55rem;
+      }
+      .consent-legal a { color: var(--dk-blurple); font-weight: 700; text-decoration: underline; }
+      .required-mark { color: var(--dk-red); margin-left: 0.12rem; font-weight: 700; }
+      .hint { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; margin-top: 0.35rem; }
+      .hint--warning { color: var(--dk-red); font-weight: 500; }
+      .card-intro {
+        font-size: 0.86rem;
+        color: var(--text-secondary);
+        margin: 0 0 1.05rem;
+        line-height: 1.55;
+        max-width: 76ch;
+      }
+      .form-actions {
+        margin-top: 0.6rem;
+        padding-top: 0.2rem;
+      }
+      .community-card {
+        border: 1px solid var(--border-subtle);
+        background: #fff;
+        padding: 1rem 1.05rem;
+        margin-top: 1rem;
+        margin-bottom: 0.4rem;
+      }
+      .community-card__title {
+        font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--dk-red);
+        font-size: 1.02rem;
+        margin: 0 0 0.35rem;
+      }
+      .community-card__line {
+        color: var(--text-secondary);
+        font-size: 0.86rem;
+        margin: 0 0 0.55rem;
+      }
+      .community-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .community-link {
+        border: 1px solid var(--border-subtle);
+        background: #fff;
+        padding: 0.34rem 0.58rem;
+        border-radius: 999px;
+        color: var(--dk-blurple);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.34rem;
+        line-height: 1;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+      .community-link svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        display: block;
+      }
+      .community-link:hover {
+        border-color: var(--dk-red);
+        background: #fff7f6;
+        color: var(--dk-red);
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+      button {
+        background: var(--dk-red);
+        color: #fff;
+        border: 0;
+        border-radius: 0;
+        padding: 0.86rem 1.5rem;
+        cursor: pointer;
+        min-width: 12rem;
+        font-size: 0.98rem;
+        letter-spacing: 0.01em;
+      }
+      button:focus-visible {
+        outline: 3px solid var(--dk-light-board);
+        outline-offset: 2px;
+      }
+      button:hover { background: var(--dk-red-dark); }
+      .flash { padding: 0.7rem 0.8rem; margin-bottom: 0.7rem; font-size: 0.9rem; }
+      .flash.success { background: var(--bg); color: var(--dk-blurple); border: 1px solid var(--border-subtle); }
+      .flash.error { background: var(--bg); color: var(--text-primary); border: 1px solid var(--dk-red); }
+      .success-card {
+        border: 1px solid var(--border-subtle);
+        background: #fff;
+        padding: 1.35rem 1.15rem 1.15rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        box-shadow: 0 8px 22px rgba(8, 6, 35, 0.05);
+      }
+      .success-icon {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 0.72rem;
+        border: 2px solid #22a06b;
+        color: #22a06b;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .success-icon svg {
+        width: 28px;
+        height: 28px;
+        fill: currentColor;
+      }
+      .success-title {
+        font-size: 1.2rem;
+        line-height: 1.2;
+        color: var(--dk-red);
+        margin-bottom: 0.42rem;
+      }
+      .success-message {
+        color: var(--dk-blurple);
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.42rem;
+      }
+      .success-help {
+        color: var(--text-secondary);
+        font-size: 0.86rem;
+        line-height: 1.5;
+        max-width: 64ch;
+        margin: 0 auto;
+      }
+      .hidden { display: none; }
+      .muted { color: var(--text-secondary); font-size: 0.82rem; margin-top: 0.35rem; }
+      @media (max-width: 479px) {
+        .site-header { padding: 14px 0 12px; }
+        .menu { gap: 0.35rem; }
+        .menu__link { font-size: 0.78rem; padding: 0.36rem 0.58rem; }
+        .hero { padding: 1rem 0.7rem 0.78rem; }
+        .hero__title { font-size: 1.2rem; }
+        .hero__subtitle { font-size: 0.84rem; }
+      }
+      @media (min-width: 560px) {
+        .row.two { grid-template-columns: 1fr 1fr; }
+      }
+      @media (min-width: 760px) {
+        .page { max-width: 960px; padding-left: 24px; padding-right: 24px; }
+        .hero__title { font-size: 1.7rem; }
+        .site-header__logo img { height: 38px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="site-header">
+        <a class="site-header__logo" href="https://circuitdigest.com" target="_blank" rel="noopener noreferrer" aria-label="CircuitDigest home">
+          <img src="https://circuitdigest.com/sites/default/files/inline-images/logo_circuitdigest.png" alt="CircuitDigest">
+        </a>
+      </header>
+      <nav class="menu" aria-label="Project idea sections">
+        <a class="menu__link" href="#register-section">Register</a>
+        <a class="menu__link" href="#submit-idea-section">Submit Idea</a>
+        <a class="menu__link" href="{{ url_for('project_idea_bp.submit_project_idea_resources', slug=campaign.slug) }}">Resources</a>
+        <a class="menu__link" href="{{ url_for('project_idea_bp.submit_project_idea_faq', slug=campaign.slug) }}">FAQ</a>
+      </nav>
+
+      {% if campaign.banner_image_url %}
+      <section class="hero-banner" aria-label="Campaign banner">
+        <img src="{{ campaign.banner_image_url }}" alt="{{ campaign.board_name }} campaign banner">
+      </section>
+      {% endif %}
+
+      <section class="hero">
+        <h1 class="hero__title dk-headline">Register &amp; Submit Your Project Idea</h1>
+        <p class="hero__subtitle">
+          Register as a participant and submit your project idea to stand a chance to win the {{ campaign.board_name }} for free.
+        </p>
+      </section>
+
+      <p class="deadline-line" data-deadline-date="{{ campaign.registration_deadline }}">
+        <span class="deadline-line__label">Last Date to Register</span>
+        <span class="deadline-line__date">{{ campaign.registration_deadline }}</span>
+        <span class="deadline-line__countdown" id="deadlineCountdown">Closing soon</span>
+      </p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      {% if success_mode %}
+      <section class="success-card" id="register-section" aria-live="polite">
+        <div class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9.55 17.2 4.8 12.46l1.4-1.42 3.35 3.34 8.25-8.25 1.4 1.42-9.65 9.65z"/></svg>
+        </div>
+        <h2 class="success-title dk-headline">Submission Successful</h2>
+        <p class="success-message">{{ success_message }}</p>
+        {% if success_kind == "updated" %}
+        <p class="success-help">We have saved your latest project idea and profile details. You can submit again anytime before the deadline using the same email and phone number.</p>
+        {% else %}
+        <p class="success-help">Thank you for sharing your project idea. Our team will review your submission and contact you if your idea is selected.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      {% if not registration_open and not success_mode %}
+        <div class="notice" role="status">
+          {% if registration_status == 'disabled' %}
+            Registration is not open for this page right now.
+          {% elif registration_status == 'closed_deadline' %}
+            The registration period for this board has ended.
+          {% else %}
+            Registration is not available.
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if registration_open and not success_mode %}
+      <form method="post" action="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}">
+        <input type="text" name="website" class="hidden" tabindex="-1" autocomplete="off">
+
+        <section class="card" id="register-section">
+          <h2 class="dk-headline">Participant Registration</h2>
+
+          <div class="form-block">
+            <div class="row two">
+              <div>
+                <label for="first_name">First Name<span class="required-mark">*</span></label>
+                <input id="first_name" name="first_name" type="text" autocomplete="given-name" required value="{{ form_data.get('first_name', '') }}">
+              </div>
+              <div>
+                <label for="last_name">Last Name<span class="required-mark">*</span></label>
+                <input id="last_name" name="last_name" type="text" autocomplete="family-name" required value="{{ form_data.get('last_name', '') }}">
+              </div>
+            </div>
+
+            <div class="row two">
+              <div>
+                <label for="phone">Phone (Mobile)</label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" value="{{ form_data.get('phone', '') }}">
+              </div>
+              <div>
+                <label for="email">Email<span class="required-mark">*</span></label>
+                <input id="email" name="email" type="email" autocomplete="email" required value="{{ form_data.get('email', '') }}">
+              </div>
+            </div>
+
+            <div class="row two">
+              <div>
+                <label for="title">Title<span class="required-mark">*</span></label>
+                <select id="title" name="title" required>
+                  <option value="">Select title</option>
+                  {% for t in title_options %}
+                    <option value="{{ t }}" {% if form_data.get('title') == t %}selected{% endif %}>{{ t }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label for="industry">Industry<span class="required-mark">*</span></label>
+                <select id="industry" name="industry" required>
+                  <option value="">Select industry</option>
+                  {% for ind in industry_options %}
+                    <option value="{{ ind }}" {% if form_data.get('industry') == ind %}selected{% endif %}>{{ ind }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="row row--company">
+              <label for="company">Company<span class="required-mark">*</span></label>
+              <input id="company" name="company" type="text" autocomplete="organization" required value="{{ form_data.get('company', '') }}">
+            </div>
+          </div>
+
+          <div class="form-block">
+            <div class="row two">
+              <div>
+                <label for="address1">Address Line 1</label>
+                <input id="address1" name="address1" type="text" autocomplete="street-address" value="{{ form_data.get('address1', '') }}">
+              </div>
+              <div>
+                <label for="address2">Address Line 2</label>
+                <input id="address2" name="address2" type="text" value="{{ form_data.get('address2', '') }}">
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="city">City</label>
+                <input id="city" name="city" type="text" autocomplete="address-level2" value="{{ form_data.get('city', '') }}">
+              </div>
+              <div>
+                <label for="state_province">State / Province<span class="required-mark">*</span></label>
+                <input id="state_province" name="state_province" type="text" autocomplete="address-level1" required value="{{ form_data.get('state_province', '') }}">
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="country">Country<span class="required-mark">*</span></label>
+                <select id="country" name="country" required>
+                  <option value="">Select country</option>
+                  {% for c in country_options %}
+                    <option value="{{ c }}" {% if form_data.get('country') == c %}selected{% endif %}>{{ c }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label for="zip">Zip / Postal Code</label>
+                <input id="zip" name="zip" type="text" autocomplete="postal-code" value="{{ form_data.get('zip', '') }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-block">
+            <h3 class="section-subtitle">Social Profiles <span class="optional-note">(Optional but Recommended)</span></h3>
+            <div class="row two">
+              <div>
+                <label for="social_linkedin">LinkedIn</label>
+                <input id="social_linkedin" name="social_linkedin" type="url" placeholder="https://linkedin.com/in/…" value="{{ form_data.get('social_linkedin', '') }}">
+              </div>
+              <div>
+                <label for="social_youtube">YouTube</label>
+                <input id="social_youtube" name="social_youtube" type="url" placeholder="https://youtube.com/@…" value="{{ form_data.get('social_youtube', '') }}">
+              </div>
+            </div>
+            <div class="row two">
+              <div>
+                <label for="social_instagram">Instagram</label>
+                <input id="social_instagram" name="social_instagram" type="url" placeholder="https://instagram.com/…" value="{{ form_data.get('social_instagram', '') }}">
+              </div>
+              <div>
+                <label for="social_x">X (Twitter)</label>
+                <input id="social_x" name="social_x" type="url" placeholder="https://x.com/…" value="{{ form_data.get('social_x', '') }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-block form-block--flush">
+            <p class="consent-legal">
+              Please check this box if you would like DigiKey to be provided with your email address by CircuitDigest so that they can send you direct marketing emails about their products and services. You can withdraw your consent at any time with future effect by clicking on the opt-out link contained in every direct marketing email you receive. For more information on how DigiKey handles personal data, please refer to our
+              <a href="{{ digikey_privacy_url }}" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+            </p>
+            <label class="checkbox">
+              <input type="checkbox" name="digikey_email_consent" value="on" required>
+              <span>Yes, I Agree<span class="required-mark">*</span></span>
+            </label>
+          </div>
+        </section>
+
+        <section class="card" id="submit-idea-section">
+          <h2 class="dk-headline">Your Project Idea</h2>
+          <p class="card-intro">
+            Tell us what you will be building and how the <strong>{{ campaign.board_name }}</strong> will be useful in your project.
+          </p>
+          <div class="form-block form-block--flush">
+            <div class="row">
+              <label for="project_title">Project Title<span class="required-mark">*</span></label>
+              <input id="project_title" name="project_title" type="text" required maxlength="200" placeholder="Provide a title for your project" value="{{ form_data.get('project_title', '') }}">
+            </div>
+            <div class="row">
+              <label for="project_idea">Project Concept and Plan<span class="required-mark">*</span></label>
+              <textarea id="project_idea" name="project_idea" required minlength="40" placeholder="Describe what you plan to build and how this dev. kit will be the right choice for your project">{{ form_data.get('project_idea', '') }}</textarea>
+              <p class="hint">Share any relevant work that you have already done related to your project.</p>
+              <p class="hint hint--warning" id="projectIdeaLimitWarning" hidden>You have exceeded the maximum limit of 8000 characters.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="form-actions">
+          <button type="submit" class="dk-cta">Submit Your Idea</button>
+        </div>
+      </form>
+      {% endif %}
+
+      <section class="community-card" aria-label="Community links">
+        <h2 class="community-card__title">Have Any Questions?</h2>
+        <p class="community-card__line">Start a discussion on:</p>
+        <span class="community-links">
+          <a class="community-link" href="https://discord.com/invite/UXJrFJSWpz" target="_blank" rel="noopener noreferrer" aria-label="Forum">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm2 4v2h12V9H6Zm0 4v2h8v-2H6Z"/></svg>
+            Forum
+          </a>
+          <a class="community-link" href="https://chat.whatsapp.com/KY7it69fSAG7WvZPv6JJdA?mode=gi_t" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.11 4.93c-4.3-4.3-11.27-4.3-15.57 0-3.54 3.54-4.17 8.95-1.9 13.17L0 24l5.98-1.57a11 11 0 0 0 5.23 1.33h.01c6.08 0 11.02-4.94 11.03-11.02.01-2.95-1.14-5.73-3.13-7.81zM11.22 21.5h-.01c-1.67 0-3.31-.45-4.74-1.29l-.34-.2-3.55.93.95-3.46-.22-.35a8.7 8.7 0 0 1 1.35-10.79 8.77 8.77 0 0 1 12.41 0 8.68 8.68 0 0 1 2.55 6.19c0 4.84-3.94 8.77-8.4 8.77zm4.81-6.56c-.26-.13-1.55-.76-1.79-.85-.24-.09-.41-.13-.58.13-.17.26-.67.85-.82 1.03-.15.17-.3.2-.56.07-.26-.13-1.09-.4-2.08-1.27-.77-.68-1.29-1.52-1.44-1.78-.15-.26-.02-.4.11-.53.12-.12.26-.3.39-.45.13-.15.17-.26.26-.43.09-.17.04-.32-.02-.45-.06-.13-.58-1.41-.79-1.94-.21-.5-.42-.43-.58-.44l-.5-.01c-.17 0-.45.06-.69.32-.24.26-.91.89-.91 2.17s.93 2.52 1.06 2.69c.13.17 1.82 2.78 4.42 3.9.62.27 1.11.43 1.49.55.63.2 1.2.17 1.65.1.5-.07 1.55-.63 1.77-1.24.22-.61.22-1.13.15-1.24-.07-.11-.24-.17-.5-.3z"/></svg>
+            WhatsApp
+          </a>
+          <a class="community-link" href="https://t.me/circuitdigest" target="_blank" rel="noopener noreferrer" aria-label="Telegram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.3 4.3 3.6 11.1c-1.2.5-1.2 1.2-.2 1.5l4.5 1.4 1.8 5.8c.2.6.1.8.8.8.5 0 .7-.2 1-.5l2.2-2.1 4.5 3.3c.8.4 1.4.2 1.6-.8l3-14.1c.3-1.2-.4-1.7-1.5-1.3ZM9 13.7l9.8-6.2c.5-.3 1-.1.6.3l-8.1 7.3-.3 3.2-2-4.6Z"/></svg>
+            Telegram
+          </a>
+          <a class="community-link" href="https://discord.com/invite/UXJrFJSWpz" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.3 5.3A16 16 0 0 0 16.3 4l-.2.5a11 11 0 0 1 2.7 1.3 10.5 10.5 0 0 0-3.3-1 14.1 14.1 0 0 0-7 0 10.5 10.5 0 0 0-3.3 1A11 11 0 0 1 7.9 4l-.2-.5a16 16 0 0 0-4 1.3C1.2 9.2.6 13.6.9 18a16.5 16.5 0 0 0 4.9 2.5l1.1-1.8a10.4 10.4 0 0 1-1.7-.8l.4-.3c3.2 1.5 6.7 1.5 9.8 0l.4.3c-.5.3-1.1.6-1.7.8l1.1 1.8A16.5 16.5 0 0 0 23.1 18c.4-5.1-.8-9.5-2.8-12.7ZM9.5 15.3c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Zm5 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2Z"/></svg>
+            Discord
+          </a>
+        </span>
+      </section>
+    </main>
+    <script>
+      (function () {
+        var container = document.querySelector(".deadline-line[data-deadline-date]");
+        var countdownEl = document.getElementById("deadlineCountdown");
+        if (!container || !countdownEl) return;
+
+        var dateText = container.getAttribute("data-deadline-date");
+        if (!dateText) return;
+
+        // Registration closes at 11:59 PM IST on the selected date.
+        var target = new Date(dateText + "T23:59:00+05:30");
+        if (Number.isNaN(target.getTime())) {
+          countdownEl.textContent = "Deadline approaching";
+          return;
+        }
+
+        function updateCountdown() {
+          var now = new Date();
+          var diffMs = target.getTime() - now.getTime();
+          if (diffMs <= 0) {
+            countdownEl.textContent = "Registration closed";
+            return;
+          }
+
+          var totalMinutes = Math.floor(diffMs / 60000);
+          var days = Math.floor(totalMinutes / 1440);
+          var hours = Math.floor((totalMinutes % 1440) / 60);
+          var minutes = totalMinutes % 60;
+
+          if (days > 0) {
+            countdownEl.textContent = "Closes in " + days + "D " + hours + "H";
+          } else if (hours > 0) {
+            countdownEl.textContent = "Closes in " + hours + "H " + minutes + "M";
+          } else {
+            countdownEl.textContent = "Closes in " + minutes + "M";
+          }
+        }
+
+        updateCountdown();
+        window.setInterval(updateCountdown, 60000);
+      })();
+
+      (function () {
+        var projectIdeaEl = document.getElementById("project_idea");
+        var warningEl = document.getElementById("projectIdeaLimitWarning");
+        var maxChars = 8000;
+
+        if (!projectIdeaEl || !warningEl) return;
+
+        function validateProjectIdeaLength() {
+          var isOverLimit = projectIdeaEl.value.length > maxChars;
+          warningEl.hidden = !isOverLimit;
+          projectIdeaEl.setCustomValidity(
+            isOverLimit ? "Project concept and plan must be 8000 characters or fewer." : ""
+          );
+        }
+
+        projectIdeaEl.addEventListener("input", validateProjectIdeaLength);
+        validateProjectIdeaLength();
+      })();
+    </script>
+  </body>
+</html>
