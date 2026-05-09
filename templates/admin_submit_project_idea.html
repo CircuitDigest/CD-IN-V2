@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Submit your project idea · Admin</title>
+    <title>Learn . Build . Win · Admin</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/cd-icon.png') }}">
     <style>
       body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #0f172a; }
@@ -58,7 +58,7 @@
         <a class="tab" href="{{ url_for('admin_bp.admin') }}">Overview</a>
         <a class="tab" href="{{ url_for('admin_bp.admin_instagram_microsite') }}">Instagram Microsite</a>
         <a class="tab" href="{{ url_for('webinar_bp.admin_webinar') }}">Webinar</a>
-        <a class="tab active" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Submit your project idea</a>
+        <a class="tab active" href="{{ url_for('project_idea_bp.admin_submit_project_idea') }}">Learn . Build . Win</a>
       </nav>
 
       {% if message %}
@@ -70,7 +70,7 @@
         <p style="margin:0;font-size:0.88rem;color:#475569;line-height:1.55;">
           <strong>IST (Asia/Kolkata)</strong> is used for the calendar day when deciding if a page is still within its
           <strong>last registration date</strong> (deadline day is inclusive). Public URL pattern:
-          <span class="mono">/submit-your-project-idea/&lt;slug&gt;</span> — use the link in the table to open the live page.
+          <span class="mono">/learn-build-win-by-digikey/&lt;slug&gt;</span> — use the link in the table to open the live page.
         </p>
       </section>
 
@@ -109,7 +109,7 @@
                     </td>
                     <td>{{ 'Yes' if c.is_active else 'No' }}</td>
                     <td>
-                      <a class="mono" href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=c.slug) }}" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8;font-weight:600;">/submit-your-project-idea/{{ c.slug }}</a>
+                      <a class="mono" href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=c.slug) }}" target="_blank" rel="noopener noreferrer" style="color:#1d4ed8;font-weight:600;">/learn-build-win-by-digikey/{{ c.slug }}</a>
                     </td>
                     <td>
                       <div class="toolbar">

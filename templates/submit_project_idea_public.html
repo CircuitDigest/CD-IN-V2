@@ -88,10 +88,20 @@
         border: 1px solid var(--border-subtle);
         padding: 0.4rem 0.72rem;
         line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        white-space: nowrap;
       }
       .menu__link:hover {
         border-color: var(--dk-red);
         color: var(--dk-red);
+      }
+      .menu__link.active {
+        color: #fff;
+        border-color: var(--dk-red);
+        background: var(--dk-red);
+        font-weight: 600;
       }
       .hero {
         text-align: center;
@@ -447,8 +457,7 @@
         </a>
       </header>
       <nav class="menu" aria-label="Project idea sections">
-        <a class="menu__link" href="#register-section">Register</a>
-        <a class="menu__link" href="#submit-idea-section">Submit Idea</a>
+        <a class="menu__link active" href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}">Register</a>
         <a class="menu__link" href="{{ url_for('project_idea_bp.submit_project_idea_resources', slug=campaign.slug) }}">Resources</a>
         <a class="menu__link" href="{{ url_for('project_idea_bp.submit_project_idea_faq', slug=campaign.slug) }}">FAQ</a>
       </nav>
@@ -460,7 +469,7 @@
       {% endif %}
 
       <section class="hero">
-        <h1 class="hero__title dk-headline">Register &amp; Submit Your Project Idea</h1>
+        <h1 class="hero__title dk-headline">Learn, Build &amp; Win by DigiKey</h1>
         <p class="hero__subtitle">
           Register as a participant and submit your project idea to stand a chance to win the {{ campaign.board_name }} for free.
         </p>

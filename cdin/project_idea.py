@@ -59,7 +59,7 @@ def project_idea_upload(filename):
     return send_from_directory(SUBMIT_PROJECT_IDEA_UPLOADS_DIR, filename)
 
 
-@bp.route("/submit-your-project-idea/<slug>/thank-you", methods=["GET"], endpoint="submit_project_idea_thank_you")
+@bp.route("/learn-build-win-by-digikey/<slug>/thank-you", methods=["GET"], endpoint="submit_project_idea_thank_you")
 def submit_project_idea_thank_you(slug):
     campaign = get_campaign_by_slug(slug)
     if not campaign:
@@ -70,7 +70,7 @@ def submit_project_idea_thank_you(slug):
     )
 
 
-@bp.route("/submit-your-project-idea/<slug>/resources", methods=["GET"], endpoint="submit_project_idea_resources")
+@bp.route("/learn-build-win-by-digikey/<slug>/resources", methods=["GET"], endpoint="submit_project_idea_resources")
 def submit_project_idea_resources(slug):
     campaign = get_campaign_by_slug(slug)
     if not campaign:
@@ -81,7 +81,7 @@ def submit_project_idea_resources(slug):
     )
 
 
-@bp.route("/submit-your-project-idea/<slug>/faq", methods=["GET"], endpoint="submit_project_idea_faq")
+@bp.route("/learn-build-win-by-digikey/<slug>/faq", methods=["GET"], endpoint="submit_project_idea_faq")
 def submit_project_idea_faq(slug):
     campaign = get_campaign_by_slug(slug)
     if not campaign:
@@ -92,7 +92,7 @@ def submit_project_idea_faq(slug):
     )
 
 
-@bp.route("/submit-your-project-idea/<slug>", methods=["GET", "POST"], endpoint="submit_project_idea_public")
+@bp.route("/learn-build-win-by-digikey/<slug>", methods=["GET", "POST"], endpoint="submit_project_idea_public")
 def submit_project_idea_public(slug):
     campaign = get_campaign_by_slug(slug)
     if not campaign:
@@ -150,7 +150,7 @@ def submit_project_idea_public(slug):
 
 
 @bp.route(
-    "/admin/submit-your-project-idea/export/<int:campaign_id>",
+    "/admin/learn-build-and-win/export/<int:campaign_id>",
     methods=["GET"],
     endpoint="admin_project_idea_export_csv",
 )
@@ -170,7 +170,7 @@ def admin_project_idea_export_csv(campaign_id: int):
 
 
 @bp.route(
-    "/admin/submit-your-project-idea/analytics/<int:campaign_id>",
+    "/admin/learn-build-and-win/analytics/<int:campaign_id>",
     methods=["GET"],
     endpoint="admin_project_idea_analytics",
 )
@@ -196,7 +196,7 @@ def admin_project_idea_analytics(campaign_id: int):
     )
 
 
-@bp.route("/admin/submit-your-project-idea", methods=["GET", "POST"], endpoint="admin_submit_project_idea")
+@bp.route("/admin/learn-build-and-win", methods=["GET", "POST"], endpoint="admin_submit_project_idea")
 def admin_submit_project_idea():
     if not _is_admin_authenticated():
         return redirect(url_for("admin_bp.admin"))

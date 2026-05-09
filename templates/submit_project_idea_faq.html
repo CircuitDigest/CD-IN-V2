@@ -56,7 +56,7 @@
         margin-bottom: 0.95rem;
         background: #fff;
       }
-      .menu a {
+      .menu__link {
         font-family: "DigiKey Artex", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--dk-blurple);
         text-decoration: none;
@@ -65,15 +65,20 @@
         border: 1px solid var(--border-subtle);
         padding: 0.4rem 0.72rem;
         line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        white-space: nowrap;
       }
-      .menu a:hover {
+      .menu__link:hover {
         border-color: var(--dk-red);
         color: var(--dk-red);
       }
-      .menu a.active {
+      .menu__link.active {
         color: #fff;
         border-color: var(--dk-red);
         background: var(--dk-red);
+        font-weight: 600;
       }
       .hero {
         text-align: center;
@@ -173,7 +178,7 @@
       }
       @media (max-width: 479px) {
         .menu { gap: 0.35rem; }
-        .menu a { font-size: 0.78rem; padding: 0.36rem 0.58rem; }
+        .menu__link { font-size: 0.78rem; padding: 0.36rem 0.58rem; }
         .hero { padding: 1rem 0.7rem 0.78rem; }
         .hero__title { font-size: 1.2rem; }
         .hero__subtitle { font-size: 0.84rem; }
@@ -193,10 +198,9 @@
         </a>
       </header>
       <nav class="menu" aria-label="Project idea sections">
-        <a href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}#register-section">Register</a>
-        <a href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}#submit-idea-section">Submit Idea</a>
-        <a href="{{ url_for('project_idea_bp.submit_project_idea_resources', slug=campaign.slug) }}">Resources</a>
-        <a class="active" href="{{ url_for('project_idea_bp.submit_project_idea_faq', slug=campaign.slug) }}">FAQ</a>
+        <a class="menu__link" href="{{ url_for('project_idea_bp.submit_project_idea_public', slug=campaign.slug) }}">Register</a>
+        <a class="menu__link" href="{{ url_for('project_idea_bp.submit_project_idea_resources', slug=campaign.slug) }}">Resources</a>
+        <a class="menu__link active" href="{{ url_for('project_idea_bp.submit_project_idea_faq', slug=campaign.slug) }}">FAQ</a>
       </nav>
 
       <section class="hero">
